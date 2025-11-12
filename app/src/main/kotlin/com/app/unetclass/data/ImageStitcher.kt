@@ -1,8 +1,10 @@
 package com.app.unetclass.data
 
+import android.content.Context
 import android.graphics.Bitmap
 import org.pytorch.Tensor
 import kotlin.math.min
+import androidx.core.graphics.createBitmap
 
 class ImageStitcher(
     private val overlap: Int, // Размер перекрытия (e.g., 64)
@@ -11,21 +13,21 @@ class ImageStitcher(
     private val halfOverlap = overlap / 2 // Половина перекрытия (e.g., 32)
 
     /**
-     * Собирает предсказанные маски в одно полноразмерное изображение.
+     * Собирает предсказанные маски в одно полноразмерное изображение и маски для каждого класса.
      * Аналог glit_image.
      *
      * @param outputTensors Список выходных тензоров (результатов инференса).
      * @param tilesList Список объектов Tile, содержащих координаты нарезки.
      * @param originalWidth Ширина исходного изображения.
      * @param originalHeight Высота исходного изображения.
-     * @return Финальная 8-битная маска (Bitmap) или массив байтов.
+     * @return Результат соединения: финальная маска и маски для каждого класса.
      */
     fun stitchMasks(
         outputTensors: List<Tensor>,
         tilesList: List<Tile>,
         originalWidth: Int,
         originalHeight: Int
-    ): Bitmap {
+    ): ImageStitcherResult {
         if (outputTensors.size != tilesList.size) {
             throw IllegalArgumentException("Количество тензоров должно совпадать с количеством фрагментов.")
         }
@@ -102,21 +104,20 @@ class ImageStitcher(
         }
 
         // --- 2. Постобработка (Аналог to_0_255_format_img) ---
-        return postProcess(finalMaskArray, originalWidth, originalHeight)
+        val unitedMask = createUnitedMask(finalMaskArray, originalWidth, originalHeight)
+        val classMasks = createClassMasks(finalMaskArray, originalWidth, originalHeight)
+
+        return ImageStitcherResult(unitedMask, classMasks)
     }
 
     /**
-     * Конвертирует массив float [0.0, 1.0] в 8-битный Bitmap [0, 255] (Grayscale).
-     * @param finalMaskArray Собранный float массив [H, W, numClasses].
-     * @return Итоговый Bitmap.
+     * Создает финальную маску, где каждый пиксель отображает класс с максимальной вероятностью
      */
-    private fun postProcess(
+    private fun createUnitedMask(
         finalMaskArray: Array<Array<FloatArray>>,
         width: Int,
         height: Int
     ): Bitmap {
-        // Мы возвращаем маску, где каждый пиксель имеет значение класса.
-        // Выбираем класс с максимальной вероятностью (argmax).
         val colors = IntArray(width * height)
         var maxClass: Int
         var maxProb: Float
@@ -146,8 +147,73 @@ class ImageStitcher(
             }
         }
 
-        val outputBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+        val outputBitmap = createBitmap(width, height)
         outputBitmap.setPixels(colors, 0, width, 0, 0, width, height)
         return outputBitmap
+    }
+
+    /**
+     * Создает маски для каждого класса, где пиксель белый если принадлежит классу, черный - если нет
+     */
+    private fun createClassMasks(
+        finalMaskArray: Array<Array<FloatArray>>,
+        width: Int,
+        height: Int
+    ): List<Bitmap> {
+        val classMasks = mutableListOf<Bitmap>()
+
+        for (classIndex in 0 until numClasses) {
+            val colors = IntArray(width * height)
+
+            for (y in 0 until height) {
+                for (x in 0 until width) {
+                    // Если вероятность принадлежности к классу выше 0.5, делаем пиксель белым
+                    val isClass = finalMaskArray[y][x][classIndex] > 0.5f
+                    val colorValue = if (isClass) 255 else 0
+
+                    // Создание Grayscale цвета (RGB=value)
+                    colors[y * width + x] = 0xFF shl 24 or (colorValue shl 16) or (colorValue shl 8) or colorValue
+                }
+            }
+
+            val classBitmap = createBitmap(width, height)
+            classBitmap.setPixels(colors, 0, width, 0, 0, width, height)
+            classMasks.add(classBitmap)
+        }
+
+        return classMasks
+    }
+    
+    /**
+     * Сохраняет результаты сегментации в указанную папку
+     * 
+     * @param result Результат сегментации
+     * @param context Контекст приложения для доступа к файловой системе
+     * @return true, если сохранение прошло успешно, иначе false
+     */
+    fun saveResults(result: ImageStitcherResult, context: Context): Boolean {
+        return try {
+            // Создаем уникальную папку для сохранения результатов
+            val resultsDir = ImageSaver.createResultsDirectory(context)
+            
+            // Сохраняем финальную маску
+            val unitedMaskSaved = ImageSaver.saveImage(
+                result.unitedMask,
+                resultsDir,
+                "united_mask.png"
+            )
+            
+            // Сохраняем маски для каждого класса
+            var allClassMasksSaved = true
+            for (i in result.classMasks.indices) {
+                val classMaskSaved = ImageSaver.saveImage(result.classMasks[i], resultsDir, "class_${i}.png")
+                allClassMasksSaved = allClassMasksSaved && classMaskSaved
+            }
+            
+            unitedMaskSaved && allClassMasksSaved
+        } catch (e: Exception) {
+            e.printStackTrace()
+            false
+        }
     }
 }

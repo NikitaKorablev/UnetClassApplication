@@ -4,6 +4,7 @@ import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import com.app.unetclass.data.ImageProcessor
@@ -44,8 +45,7 @@ class MainActivity : AppCompatActivity() {
 
         binding.predictBtn.setOnClickListener {
             bitmap?.let {
-                val result = runSegmentation(it)
-                binding.imageView.setImageBitmap(result)
+                runSegmentation(it)
             }
         }
 
@@ -58,7 +58,7 @@ class MainActivity : AppCompatActivity() {
         inferenceModel = InferenceModel(applicationContext)
     }
 
-    private fun runSegmentation(inputBitmap: Bitmap): Bitmap {
+    private fun runSegmentation(inputBitmap: Bitmap) {
         // --- 1. Нарезка и подготовка тензоров (распил) ---
         val tilesList = imageProcessor.splitImageIntoTiles(inputBitmap)
         val inputTensors = imageProcessor.getTensorsForInference(tilesList)
@@ -67,14 +67,25 @@ class MainActivity : AppCompatActivity() {
         val outputTensors = inferenceModel.predictBatch(inputTensors)
 
         // --- 3. Сборка (сборка) и Постобработка ---
-        val finalMaskBitmap = imageStitcher.stitchMasks(
+        val result = imageStitcher.stitchMasks(
             outputTensors,
             tilesList,
             inputBitmap.width,
             inputBitmap.height
         )
 
-        return finalMaskBitmap
+        // Отображаем финальную маску (как и раньше)
+        binding.imageView.setImageBitmap(result.unitedMask)
+        
+        // Сохраняем все изображения (финальная маска + маски для каждого класса)
+        val saveSuccessful = imageStitcher.saveResults(result, applicationContext)
+        
+        // Показываем сообщение пользователю о результате сохранения
+        if (saveSuccessful) {
+            Toast.makeText(this, "Results saved successfully in Pictures/UnetClass/", Toast.LENGTH_LONG).show()
+        } else {
+            Toast.makeText(this, "Error saving results", Toast.LENGTH_SHORT).show()
+        }
     }
 
     /**
