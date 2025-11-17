@@ -9,17 +9,19 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import com.app.unetclass.data.ImageProcessor
 import com.app.unetclass.data.ImageStitcher
-import com.app.unetclass.data.InferenceModel
+import com.app.unetclass.models.InferenceModel
 import com.app.unetclass.databinding.ActivityMainBinding
 import androidx.core.graphics.createBitmap
+import androidx.lifecycle.lifecycleScope
+import com.app.unetclass.utils.ResultState
+import com.app.unetclass.utils.UnetModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class MainActivity : AppCompatActivity() {
-    private lateinit var imageProcessor: ImageProcessor
-    private lateinit var imageStitcher: ImageStitcher
-    private lateinit var inferenceModel: InferenceModel
-
+    private lateinit var model: UnetModel
     private lateinit var binding: ActivityMainBinding
-
     private var bitmap: Bitmap? = null
 
     // Современный способ получения результата из другого Activity
@@ -38,6 +40,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         binding.predictBtn.isEnabled = false // Кнопка "Predict" отключена по умолчанию
+        model = UnetModel(applicationContext)
 
         binding.selectImageBtn.setOnClickListener {
             pickImage.launch("image/*")
@@ -48,44 +51,44 @@ class MainActivity : AppCompatActivity() {
                 runSegmentation(it)
             }
         }
-
-        // Инициализация. Параметры TILE_SIZE=256, OVERLAP=128, NUM_CLASSES=6
-        imageProcessor = ImageProcessor(256, 128)
-        imageStitcher = ImageStitcher(128, 6)
-
-        // Инициализация модели (загрузка из assets/model.ptl)
-        // Убедитесь, что model.ptl находится в папке assets
-        inferenceModel = InferenceModel(applicationContext)
     }
 
     private fun runSegmentation(inputBitmap: Bitmap) {
-        // --- 1. Нарезка и подготовка тензоров (распил) ---
-        val tilesList = imageProcessor.splitImageIntoTiles(inputBitmap)
-        val inputTensors = imageProcessor.getTensorsForInference(tilesList)
-
-        // --- 2. Инференс (predict) ---
-        val outputTensors = inferenceModel.predictBatch(inputTensors)
-
-        // --- 3. Сборка (сборка) и Постобработка ---
-        val result = imageStitcher.stitchMasks(
-            outputTensors,
-            tilesList,
-            inputBitmap.width,
-            inputBitmap.height
-        )
-
-        // Отображаем финальную маску (как и раньше)
-        binding.imageView.setImageBitmap(result.unitedMask)
-        
-        // Сохраняем все изображения (финальная маска + маски для каждого класса)
-        val saveSuccessful = imageStitcher.saveResults(result, applicationContext)
-        
-        // Показываем сообщение пользователю о результате сохранения
-        if (saveSuccessful) {
-            Toast.makeText(this, "Results saved successfully in Pictures/UnetClass/", Toast.LENGTH_LONG).show()
-        } else {
-            Toast.makeText(this, "Error saving results", Toast.LENGTH_SHORT).show()
+        lockButtons()
+        lifecycleScope.launch(Dispatchers.IO) {
+            when(val res = model.startSegmentation(inputBitmap)) {
+                is ResultState.Success -> {
+                    withContext(Dispatchers.Main) {
+                        binding.imageView.setImageBitmap(res.data)
+                        unlockButtons()
+                        Toast.makeText(
+                            applicationContext,
+                            "Results saved successfully in Pictures/UnetClass/",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+                }
+                is ResultState.Error ->
+                    withContext(Dispatchers.Main) {
+                        unlockButtons()
+                        Toast.makeText(
+                            applicationContext,
+                            "Error saving results",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+            }
         }
+    }
+
+    private fun lockButtons() {
+        binding.selectImageBtn.isEnabled = false
+        binding.predictBtn.isEnabled = false
+    }
+
+    private fun unlockButtons() {
+        binding.selectImageBtn.isEnabled = true
+        binding.predictBtn.isEnabled = true
     }
 
     /**

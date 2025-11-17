@@ -5,6 +5,7 @@ import android.graphics.Bitmap
 import org.pytorch.Tensor
 import kotlin.math.min
 import androidx.core.graphics.createBitmap
+import com.app.unetclass.models.Tile
 
 class ImageStitcher(
     private val overlap: Int, // Размер перекрытия (e.g., 64)

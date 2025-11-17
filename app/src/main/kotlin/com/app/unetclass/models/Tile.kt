@@ -1,4 +1,4 @@
-package com.app.unetclass.data
+package com.app.unetclass.models
 
 import android.graphics.Bitmap
 

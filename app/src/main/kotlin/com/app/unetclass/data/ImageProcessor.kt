@@ -1,6 +1,7 @@
 package com.app.unetclass.data
 
 import android.graphics.Bitmap
+import com.app.unetclass.models.Tile
 import org.pytorch.Tensor
 
 class ImageProcessor(

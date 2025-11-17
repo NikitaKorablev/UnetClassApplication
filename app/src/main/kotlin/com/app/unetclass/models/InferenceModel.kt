@@ -1,7 +1,8 @@
-package com.app.unetclass.data
+package com.app.unetclass.models
 
 import android.content.Context
 import android.util.Log
+import com.app.unetclass.data.Utils
 import org.pytorch.IValue
 import org.pytorch.Module
 import org.pytorch.Tensor
