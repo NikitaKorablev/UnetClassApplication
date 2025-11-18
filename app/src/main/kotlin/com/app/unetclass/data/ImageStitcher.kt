@@ -11,6 +11,7 @@ class ImageStitcher(
     private val overlap: Int, // Размер перекрытия (e.g., 64)
     private val numClasses: Int // Количество каналов (классов) в выходном тензоре (e.g., 6)
 ) {
+    private var lastSavedPath: String = ""
     private val halfOverlap = overlap / 2 // Половина перекрытия (e.g., 32)
 
     /**
@@ -184,10 +185,10 @@ class ImageStitcher(
 
         return classMasks
     }
-    
+
     /**
      * Сохраняет результаты сегментации в указанную папку
-     * 
+     *
      * @param result Результат сегментации
      * @param context Контекст приложения для доступа к файловой системе
      * @return true, если сохранение прошло успешно, иначе false
@@ -197,24 +198,31 @@ class ImageStitcher(
             // Создаем уникальную папку для сохранения результатов
             val resultsDir = ImageSaver.createResultsDirectory(context)
             
+            // Сохраняем путь для последующего использования
+            lastSavedPath = resultsDir.absolutePath
+
             // Сохраняем финальную маску
             val unitedMaskSaved = ImageSaver.saveImage(
                 result.unitedMask,
                 resultsDir,
                 "united_mask.png"
             )
-            
+
             // Сохраняем маски для каждого класса
             var allClassMasksSaved = true
             for (i in result.classMasks.indices) {
                 val classMaskSaved = ImageSaver.saveImage(result.classMasks[i], resultsDir, "class_${i}.png")
                 allClassMasksSaved = allClassMasksSaved && classMaskSaved
             }
-            
+
             unitedMaskSaved && allClassMasksSaved
         } catch (e: Exception) {
             e.printStackTrace()
             false
         }
+    }
+    
+    fun getLastSavedPath(): String {
+        return lastSavedPath
     }
 }
