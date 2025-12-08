@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.app.unetclass.R
 import com.app.unetclass.features.fullscreen.FullscreenActivity
+import com.app.unetclass.utils.ClassNames
 import java.io.File
 
 class DetailActivity : AppCompatActivity() {
@@ -36,9 +37,11 @@ class DetailActivity : AppCompatActivity() {
         if (predictionPath != null) {
             val imageFiles = getImageFilesFromDirectory(predictionPath)
             val detailItems = imageFiles.map { file ->
+                val className = extractClassNameFromFile(file.name)
                 DetailImageItem(
                     imagePath = file.absolutePath,
-                    imageName = file.name
+                    imageName = file.name,
+                    className = className
                 )
             }
 
@@ -73,6 +76,16 @@ class DetailActivity : AppCompatActivity() {
         return directory.listFiles { file ->
             file.isFile && isImageFile(file)
         }?.sortedBy { it.name } ?: emptyList()
+    }
+
+    private fun extractClassNameFromFile(fileName: String): String? {
+        // Ищем, соответствует ли имя файла шаблону className_prediction.png
+        for (className in ClassNames.NAMES) {
+            if (fileName.startsWith("$className" + "_prediction.")) {
+                return className
+            }
+        }
+        return null  // для других файлов, таких как united_mask.png
     }
 
     private fun isImageFile(file: File): Boolean {

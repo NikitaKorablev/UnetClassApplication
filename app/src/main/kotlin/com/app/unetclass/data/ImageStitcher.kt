@@ -6,6 +6,7 @@ import org.pytorch.Tensor
 import kotlin.math.min
 import androidx.core.graphics.createBitmap
 import com.app.unetclass.models.Tile
+import com.app.unetclass.utils.ClassNames
 
 class ImageStitcher(
     private val overlap: Int, // Размер перекрытия (e.g., 64)
@@ -197,7 +198,7 @@ class ImageStitcher(
         return try {
             // Создаем уникальную папку для сохранения результатов
             val resultsDir = ImageSaver.createResultsDirectory(context)
-            
+
             // Сохраняем путь для последующего использования
             lastSavedPath = resultsDir.absolutePath
 
@@ -208,10 +209,14 @@ class ImageStitcher(
                 "united_mask.png"
             )
 
-            // Сохраняем маски для каждого класса
+            // Сохраняем маски для каждого класса с именами классов
             var allClassMasksSaved = true
             for (i in result.classMasks.indices) {
-                val classMaskSaved = ImageSaver.saveImage(result.classMasks[i], resultsDir, "class_${i}.png")
+                val classMaskSaved = ImageSaver.saveImage(
+                    result.classMasks[i],
+                    resultsDir,
+                    "${ClassNames.NAMES[i]}_prediction.png"
+                )
                 allClassMasksSaved = allClassMasksSaved && classMaskSaved
             }
 

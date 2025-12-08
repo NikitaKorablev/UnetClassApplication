@@ -38,6 +38,12 @@ class DetailAdapter(
                 .error(android.R.drawable.ic_menu_report_image)
                 .into(imageView)
 
+            // Отображение имени файла и класса (если доступно)
+//            val displayName = if (item.className != null) {
+//                "${item.className}: ${item.imageName}"
+//            } else {
+//                item.imageName
+//            }
             nameTextView.text = item.imageName
 
             itemView.setOnClickListener {
