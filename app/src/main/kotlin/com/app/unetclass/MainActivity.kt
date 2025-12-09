@@ -5,44 +5,44 @@ import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.app.unetclass.data.ImageProcessor
-import com.app.unetclass.data.ImageStitcher
+import androidx.activity.viewModels
 import com.app.unetclass.data.TimeMeasurementService
 import com.app.unetclass.databinding.ActivityMainBinding
 import androidx.core.graphics.createBitmap
-import androidx.lifecycle.lifecycleScope
-import com.app.unetclass.domain.ISegmentationUseCase
 import com.app.unetclass.domain.ITimeMeasurementUseCase
 import com.app.unetclass.features.detail.DetailActivity
-import com.app.unetclass.models.PredictionHistoryItem
 import com.app.unetclass.presentation.HistoryAdapter
 import com.app.unetclass.presentation.SegmentationPresenter
-import com.app.unetclass.utils.ResultState
+import com.app.unetclass.features.transparency.TransparencySettingsActivity
+import com.app.unetclass.presentation.viewmodel.MainViewModel
+import com.app.unetclass.presentation.viewmodel.MainViewModelFactory
 import com.app.unetclass.utils.UnetModel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 class MainActivity : AppCompatActivity() {
     private lateinit var model: UnetModel
     private lateinit var binding: ActivityMainBinding
-    private var bitmap: Bitmap? = null
     private lateinit var presenter: SegmentationPresenter
     private lateinit var timeMeasurementService: ITimeMeasurementUseCase
     private lateinit var historyAdapter: HistoryAdapter
-    private var selectedHistoryItem: PredictionHistoryItem? = null
+
+    // Получаем ViewModel с использованием фабрики
+    private val viewModel: MainViewModel by viewModels {
+        MainViewModelFactory(application, model)
+    }
 
     // Современный способ получения результата из другого Activity
-    private val pickImage = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+    private val pickImage = registerForActivityResult(
+        ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
         uri?.let {
             val originalBitmap = MediaStore.Images.Media.getBitmap(contentResolver, it)
-            bitmap = toGrayscale(originalBitmap) // Конвертируем в оттенки серого
-            binding.imageView.setImageBitmap(bitmap)
-            binding.predictBtn.isEnabled = true // Активируем кнопку после выбора изображения
+            val grayscaleBitmap = toGrayscale(originalBitmap)
+            viewModel.setSelectedImage(grayscaleBitmap, it)
         }
     }
 
@@ -51,44 +51,82 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        binding.predictBtn.isEnabled = false // Кнопка "Predict" отключена по умолчанию
-        binding.moreInfoButton.isEnabled = false
         model = UnetModel(applicationContext)
 
         // Инициализация новых компонентов
         timeMeasurementService = TimeMeasurementService()
-        presenter = SegmentationPresenter(model, timeMeasurementService)
+        presenter = SegmentationPresenter(
+            model,
+            timeMeasurementService
+        )
 
         // Инициализация RecyclerView и адаптера
         initRecyclerView()
+
+        // Инициализация при первом запуске
+        binding.predictBtn.isEnabled = false // Кнопка "Predict" отключена по умолчанию
+        binding.moreInfoButton.isEnabled = false
+
+        // Восстановление состояния больше не требуется,
+        // так как данные теперь управляются через ViewModel
+
+        // Подписка на LiveData из ViewModel
+        observeViewModel()
 
         binding.selectImageBtn.setOnClickListener {
             pickImage.launch("image/*")
         }
 
         binding.predictBtn.setOnClickListener {
-            bitmap?.let {
-                runSegmentation(it)
+            viewModel.bitmap.value?.let { bitmap ->
+                viewModel.buttonsStateManager.disableButtons()
+                viewModel.runSegmentation(bitmap)
             }
         }
 
+        binding.settingsBtn.setOnClickListener {
+            // Открываем TransparencySettingsActivity с текущим изображением
+            val intent = Intent(this, TransparencySettingsActivity::class.java).apply {
+                // Передаем путь к последнему сохраненному результату
+                val lastSavedPath = model.getLastSavedPath()
+                if (lastSavedPath.isNotEmpty()) {
+                    putExtra("result_path", lastSavedPath)
+
+                    // Формируем пути к маскам классов
+                    val classMaskPaths = mutableListOf<String>()
+                    for (className in com.app.unetclass.utils.ClassNames.NAMES) {
+                        val maskPath = "$lastSavedPath/${className}_prediction.png"
+                        classMaskPaths.add(maskPath)
+                    }
+                    putStringArrayListExtra("class_masks_paths", ArrayList(classMaskPaths))
+                } else {
+                    Log.e(TAG, "No segmentation results available. Please run segmentation first.")
+                    return@setOnClickListener
+                }
+            }
+            startActivity(intent)
+        }
+
         binding.moreInfoButton.setOnClickListener {
-            selectedHistoryItem?.let { historyItem ->
+            viewModel.selectedHistoryItem.value?.let { historyItem ->
                 val intent = Intent(this, DetailActivity::class.java).apply {
                     putExtra("prediction_path", historyItem.outputPath)
                 }
                 startActivity(intent)
             } ?: run {
-                Toast.makeText(this, "Please select a prediction first", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    this,
+                    "Please select a prediction first",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
         }
     }
 
     private fun initRecyclerView() {
         historyAdapter = HistoryAdapter(onItemClick = { historyItem ->
-            // Обработка клика по элементу истории - загрузка и отображение изображения
-            selectedHistoryItem = historyItem
-            displayImageFromHistory(historyItem)
+            // Обработка клика по элементу истории через ViewModel
+            viewModel.loadHistoryImage(historyItem)
         })
 
         binding.historyRecyclerView.apply {
@@ -97,32 +135,9 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun displayImageFromHistory(historyItem: PredictionHistoryItem) {
-        // Формируем путь к изображению из истории
-        val imagePath = "${historyItem.outputPath}/united_mask.png"
-
-        // Загружаем изображение и отображаем его в ImageView
-        lifecycleScope.launch(Dispatchers.IO) {
-            try {
-                val bitmap = loadBitmapFromPath(imagePath)
-                if (bitmap != null) {
-                    withContext(Dispatchers.Main) {
-                        binding.imageView.setImageBitmap(bitmap)
-                        Toast.makeText(this@MainActivity, "History image loaded: ${historyItem.timestamp}", Toast.LENGTH_SHORT).show()
-                    }
-                } else {
-                    withContext(Dispatchers.Main) {
-                        Toast.makeText(this@MainActivity, "Failed to load image from: $imagePath", Toast.LENGTH_SHORT).show()
-                    }
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
-                withContext(Dispatchers.Main) {
-                    Toast.makeText(this@MainActivity, "Error loading history image: ${e.message}", Toast.LENGTH_SHORT).show()
-                }
-            }
-        }
-    }
+    // Метод displayImageFromHistory больше не нужен,
+    // так как загрузка изображений из истории теперь происходит через ViewModel
+    // При необходимости этот функционал можно вызвать через viewModel.loadHistoryImage(historyItem)
 
     private fun loadBitmapFromPath(imagePath: String): Bitmap? {
         return try {
@@ -136,53 +151,6 @@ class MainActivity : AppCompatActivity() {
             e.printStackTrace()
             null
         }
-    }
-
-    private fun runSegmentation(inputBitmap: Bitmap) {
-        lockButtons()
-        lifecycleScope.launch(Dispatchers.IO) {
-            when(val res = presenter.startSegmentation(inputBitmap) { historyItems ->
-                // Обновляем список истории
-                lifecycleScope.launch(Dispatchers.Main) {
-                    historyItems.forEach { item ->
-                        historyAdapter.addItem(item)
-                    }
-                }
-            }) {
-                is ResultState.Success -> {
-                    withContext(Dispatchers.Main) {
-                        binding.imageView.setImageBitmap(res.data.bitmap)
-                        unlockButtons()
-                        Toast.makeText(
-                            applicationContext,
-                            "Results saved successfully in Pictures/UnetClass/",
-                            Toast.LENGTH_LONG
-                        ).show()
-                    }
-                }
-                is ResultState.Error ->
-                    withContext(Dispatchers.Main) {
-                        unlockButtons()
-                        Toast.makeText(
-                            applicationContext,
-                            "Error saving results: ${res.error}",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
-            }
-        }
-    }
-
-    private fun lockButtons() {
-        binding.selectImageBtn.isEnabled = false
-        binding.predictBtn.isEnabled = false
-        binding.moreInfoButton.isEnabled = false
-    }
-
-    private fun unlockButtons() {
-        binding.selectImageBtn.isEnabled = true
-        binding.predictBtn.isEnabled = true
-        binding.moreInfoButton.isEnabled = true
     }
 
     /**
@@ -209,5 +177,70 @@ class MainActivity : AppCompatActivity() {
 
         grayscaleBitmap.setPixels(pixels, 0, width, 0, 0, width, height)
         return grayscaleBitmap
+    }
+
+    // Методы для работы с временными файлами больше не требуются,
+    // так как состояние теперь управляется через ViewModel
+
+    private fun observeViewModel() {
+        // Подписка на изменения bitmap
+        viewModel.bitmap.observe(this) { bitmap ->
+            binding.imageView.setImageBitmap(bitmap)
+        }
+
+        // Подписка на изменения URI изображения
+        viewModel.selectedImageUri.observe(this) { uri ->
+            // URI используется для передачи в другие компоненты при необходимости
+        }
+
+        // Подписка на изменения состояния кнопок
+        viewModel.buttonsStateManager.selectImageButtonIsEnabled.observe(this) { isEnabled ->
+            binding.selectImageBtn.isEnabled = isEnabled
+        }
+        viewModel.buttonsStateManager.predictButtonsIsEnabled.observe(this) { isEnabled ->
+            binding.predictBtn.isEnabled = isEnabled
+        }
+        viewModel.buttonsStateManager.settingsButtonIsEnabled.observe(this) { isEnabled ->
+            binding.settingsBtn.isEnabled = isEnabled
+        }
+        viewModel.buttonsStateManager.moreInfoButtonIsEnabled.observe(this) { isEnabled ->
+            binding.moreInfoButton.isEnabled = isEnabled
+        }
+
+        // Подписка на список истории
+        viewModel.historyItems.observe(this) { historyItems ->
+            historyAdapter.updateItems(historyItems)
+        }
+
+        // Подписка на выбранный элемент истории
+        viewModel.selectedHistoryItem.observe(this) { selectedHistoryItem ->
+            // Обработка изменения выбранного элемента истории
+            // Может потребоваться дополнительная логика
+        }
+
+        // Подписка на сообщения об ошибках
+        viewModel.errorMessage.observe(this) { errorMessage ->
+            errorMessage?.let {
+                Toast.makeText(this, it, Toast.LENGTH_LONG).show()
+                viewModel.clearError() // Очищаем ошибку после показа
+            }
+        }
+
+        // Подписка на результат сегментации
+        viewModel.segmentationResult.observe(this) { resultBitmap ->
+            resultBitmap?.let {
+                binding.imageView.setImageBitmap(it)
+                Toast.makeText(
+                    this,
+                    "Results saved successfully in Pictures/UnetClass/",
+                    Toast.LENGTH_LONG
+                ).show()
+                viewModel.clearSegmentationResultEvent()
+            }
+        }
+    }
+
+    companion object {
+        const val TAG = "MainActivity"
     }
 }

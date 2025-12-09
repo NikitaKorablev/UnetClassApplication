@@ -6,6 +6,8 @@ import com.app.unetclass.models.PredictionHistoryItem
 import com.app.unetclass.models.SegmentationResult
 import com.app.unetclass.utils.ResultState
 import android.graphics.Bitmap
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 class SegmentationPresenter(
     private val segmentationUseCase: ISegmentationUseCase,
@@ -26,7 +28,9 @@ class SegmentationPresenter(
             )
 
             // Вызвать коллбэк для обновления истории в UI
-            onHistoryUpdate(listOf(historyItem))
+            withContext(Dispatchers.Main) {
+                onHistoryUpdate(listOf(historyItem))
+            }
         }
 
         return result

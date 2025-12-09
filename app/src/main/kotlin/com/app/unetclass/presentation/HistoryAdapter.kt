@@ -27,6 +27,11 @@ class HistoryAdapter(
         notifyDataSetChanged()
     }
 
+    // Получить копию списка элементов
+    fun getItems(): List<PredictionHistoryItem> {
+        return items.toList() // Создаем копию списка, чтобы избежать изменений извне
+    }
+
     // Метод для обновления выбранной позиции
     fun setSelectedPosition(position: Int) {
         val previousPosition = selectedPosition

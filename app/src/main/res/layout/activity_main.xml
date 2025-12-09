@@ -35,7 +35,16 @@
             android:id="@+id/predictBtn"
             android:layout_width="wrap_content"
             android:layout_height="50dp"
+            android:layout_marginRight="10dp"
             android:text="Predict" />
+
+        <ImageButton
+            android:id="@+id/settingsBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
+            android:layout_marginLeft="10dp"
+            android:src="@android:drawable/ic_menu_preferences"
+            android:contentDescription="Settings" />
 
     </LinearLayout>
 
