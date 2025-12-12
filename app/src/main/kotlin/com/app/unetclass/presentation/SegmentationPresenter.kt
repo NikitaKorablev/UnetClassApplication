@@ -24,7 +24,9 @@ class SegmentationPresenter(
             val historyItem = PredictionHistoryItem(
                 timestamp = result.data.outputPath.substringAfterLast("/"),
                 executionTime = result.data.totalTimeMs,
-                outputPath = result.data.outputPath
+                outputPath = result.data.outputPath,
+                imageWidth = result.data.imageWidth,
+                imageHeight = result.data.imageHeight
             )
 
             // Вызвать коллбэк для обновления истории в UI

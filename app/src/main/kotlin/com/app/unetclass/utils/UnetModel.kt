@@ -48,7 +48,9 @@ class UnetModel(
                 SegmentationResult(
                     bitmap = result.unitedMask,
                     outputPath = outputPath,
-                    totalTimeMs = totalTime
+                    totalTimeMs = totalTime,
+                    imageWidth = result.unitedMask.width,
+                    imageHeight = result.unitedMask.height
                 )
             )
         } catch (err: Exception) {

@@ -54,10 +54,7 @@ class FilePredictionHistoryRepository : IPredictionHistoryRepository {
         val dimensionsList = mutableListOf<Pair<Int, Int>>()
         for (fileName in requiredFiles) {
             val filePath = File(directory, fileName).absolutePath
-            val dimensions = getImageDimensions(filePath)
-            if (dimensions == null) {
-                return false
-            }
+            val dimensions = getImageDimensions(filePath) ?: return false
             dimensionsList.add(dimensions)
         }
         
@@ -89,10 +86,21 @@ class FilePredictionHistoryRepository : IPredictionHistoryRepository {
         val timestamp = directory.name
         val outputPath = directory.absolutePath
         
+        // Получаем размерности изображения
+        val dimensions = getImageDimensions(File(directory, "united_mask.png").absolutePath)
+        if (dimensions == null) {
+            return null
+        }
+
+        val (width, height) = dimensions
+
         return PredictionHistoryItem(
             timestamp = timestamp,
             executionTime = 0, // Точное время выполнения недоступно из файловой системы
-            outputPath = outputPath
+            outputPath = outputPath,
+            imageWidth = width,
+            imageHeight = height
         )
     }
+
 }

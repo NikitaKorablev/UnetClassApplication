@@ -63,12 +63,14 @@ class HistoryAdapter(
     inner class HistoryViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val timestampTextView: TextView = itemView.findViewById(R.id.timestamp_text)
         private val timeTextView: TextView = itemView.findViewById(R.id.time_text)
+        private val dimensionsTextView: TextView = itemView.findViewById(R.id.dimensions_text)
 
         fun bind(item: PredictionHistoryItem, isSelected: Boolean) {
             timestampTextView.text = item.timestamp
             timeTextView.text = "${item.executionTime} ms"
+            dimensionsTextView.text = "${item.imageWidth}x${item.imageHeight}"
 
-            // Устанавливаем фон в зависимости от состояния выделения
+            // Устанавливаем фон в зависимости от состояня выделения
             if (isSelected) {
                 itemView.setBackgroundColor(ContextCompat.getColor(itemView.context, R.color.white))
             } else {

@@ -1,53 +1,55 @@
 # Project Summary
 
 ## Overall Goal
-Разработка Android-приложения для U-Net сегментации с возможностью детального просмотра результатов предиктов, включая визуальное выделение выбранного предикта в истории, отображение всех изображений выбранного предикта в детальной активности с возможностью масштабирования и полноэкранного просмотра, а также отображение сохраненных ранее предиктов при запуске приложения.
+To develop and enhance an Android application (UnetClassApplication) for U-Net image segmentation with improved state management using ViewModel, detailed result viewing, transparency settings, and robust state preservation across configuration changes.
 
 ## Key Knowledge
-- Проект написан на Kotlin с использованием Android SDK
-- Архитектура приложения следует принципам Clean Architecture
-- Используются библиотеки: PyTorch Android для ML, PhotoView для масштабирования изображений, Glide для загрузки и кэширования
-- Все изображения сохраняются в Pictures/UnetClass/ с уникальной папкой для каждого предикта
-- История предиктов отображается в RecyclerView с возможностью визуального выделения
-- Новая функциональность находится в папке `features/detail/`
-- Должны соблюдаться принципы SOLID и Clean Architecture
-- Для работы с изображениями используется MediaStore API для совместимости с ограничениями Scoped Storage на Android 10+
-- Все активности заблокированы в портретной ориентации
+- The project is a multi-framework machine learning application for biomedical image segmentation (U-Net based)
+- Android app is built with Kotlin using Android SDK with Clean Architecture principles
+- Uses PyTorch Mobile library for ML inference, PhotoView for image scaling, Glide for image loading
+- Images are saved to Pictures/UnetClass/ with unique folders per prediction with class-specific filenames
+- History of predictions is displayed in RecyclerView with visual selection highlighting
+- All image operations must be compatible with Android 10+ Scoped Storage restrictions using MediaStore API
+- Activities are locked in portrait orientation
+- Bitmaps are saved with class-specific names instead of generic names for better clarity
+- Transparency settings for classes are available through sliders in a dedicated activity
+- ViewModel is now used for state management to properly handle configuration changes
+- Dependencies: `androidx.lifecycle:lifecycle-viewmodel-ktx`, `androidx.activity:activity-ktx`
+- State must be preserved during screen rotations and activity recreations without using onSaveInstanceState for complex data
 
 ## Recent Actions
-- [DONE] Создана структура проекта с необходимыми папками и файлами
-- [DONE] Реализована детальная активность (DetailActivity) для отображения всех изображений предикта
-- [DONE] Создан адаптер (DetailAdapter) для отображения изображений в сетке 2x2
-- [DONE] Создана полноэкранные активность (FullscreenActivity) с возможностью масштабирования
-- [DONE] Обновлена MainActivity с добавлением кнопки "More Information"
-- [DONE] Обновлен HistoryAdapter с поддержкой визуального выделения выбранного элемента
-- [DONE] Добавлены макеты для новых активностей и элементов
-- [DONE] Обновлены зависимости в build.gradle для поддержки новых функций
-- [DONE] Исправлена ошибка с названием библиотеки PhotoView на правильное "com.github.chrisbanes:PhotoView:2.3.0"
-- [DONE] Созданы интерфейс IPredictionHistoryRepository, класс FilePredictionHistoryRepository и UseCase GetSavedPredictionsUseCase
-- [DONE] Изменена MainActivity для использования UseCase при загрузке сохраненных предиктов
-- [DONE] Настроена ориентация экрана в AndroidManifest.xml
-- [DONE] Реализовано решение проблемы с доступом к файлам изображений на Android 10+ через MediaStore API
+- Implemented detailed result viewing functionality with separate DetailActivity
+- Added transparency settings for different segmentation classes using sliders
+- Fixed transparency rendering implementation to properly handle alpha values
+- Fixed MainActivity state restoration issue where selected history item was lost on rotation
+- Extended state preservation to save any bitmap and the full history list using temporary files
+- Created comprehensive ViewModel architecture (MainViewModel, MainViewModelFactory)
+- Migrated MainActivity to use ViewModel for managing:
+  - Current bitmap and selected image URI
+  - History items list and selected history item
+  - Button states (enabled/disabled)
+  - Processing state and error messages
+  - Segmentation results
+- Removed old onSaveInstanceState and manual restoration code
+- Added proper SingleLiveEvent-like pattern considerations for one-time events like Toast messages
+- Updated dependencies in build.gradle for ViewModel support
+- Fixed issue where Toast messages were repeatedly shown after screen rotation
 
 ## Current Plan
-1. [DONE] Создать DTO для элемента изображения в детальной активности
-2. [DONE] Реализовать адаптер для отображения изображений в детальной активности
-3. [DONE] Создать детальную активность для отображения всех изображений предикта
-4. [DONE] Создать полноэкранный просмотрщик с возможностью масштабирования
-5. [DONE] Обновить MainActivity с добавлением кнопки "More Information"
-6. [DONE] Обновить HistoryAdapter с поддержкой визуального выделения
-7. [DONE] Добавить макеты для новых компонентов
-8. [DONE] Обновить зависимости в build.gradle
-9. [DONE] Исправить ошибки в зависимостях
-10. [DONE] Провести тестирование новой функциональности
-11. [DONE] Оптимизировать производительность при загрузке изображений
-12. [DONE] Добавить обработку ошибок при отсутствии изображений
-13. [DONE] Реализовать загрузку сохраненных предиктов при запуске приложения
-14. [DONE] Реализовать проверку корректности сохраненных предиктов (наличие всех файлов и одинаковые размеры)
-15. [DONE] Настроить ориентацию экрана для всех активностей
-16. [DONE] Исправить проблемы с доступом к файлам изображений на Android 10+
+- [DONE] Add ViewModel dependencies to build.gradle
+- [DONE] Create MainViewModel and MainViewModelFactory
+- [DONE] Integrate ViewModel into MainActivity
+- [DONE] Migrate state management logic to ViewModel
+- [DONE] Remove old onSaveInstanceState implementation
+- [DONE] Implement proper LiveData observers in MainActivity
+- [DONE] Handle potential issues with repeated events (like Toast messages) on configuration changes
+- [IN PROGRESS] Refine ViewModel implementation for edge cases and error handling
+- [TODO] Add SingleLiveEvent pattern or similar for one-time UI events like Toasts and navigation
+- [TODO] Consider refactoring SegmentationPresenter integration into ViewModel for better separation of concerns
+- [TODO] Add unit tests for ViewModel logic
+- [TODO] Review and optimize memory management for Bitmap handling in the new architecture
 
 ---
 
 ## Summary Metadata
-**Update time**: 2025-12-08T10:43:36.054Z 
+**Update time**: 2025-12-09T17:11:11.233Z 
