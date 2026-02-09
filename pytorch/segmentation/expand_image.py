@@ -31,23 +31,25 @@ def create_large_image_from_copies(input_path, output_path=None):
     
     # Получаем размеры изображения
     width, height = img.size
-    
+    res_w, res_h = int(width*(3/2)), int(height*(3/2))
+
     # Создаем новое изображение, которое будет в 2 раза больше по каждой оси
-    large_img = Image.new(img.mode, (width * 3, height * 3))
+    large_img = Image.new(img.mode, (res_w, res_h))
     
     # Размещаем 4 копии изображения в сетке 2x2
     # Позиции: (0,0), (width,0), (0,height), (width,height)
     large_img.paste(img, (0, 0))                    # верхний левый
+
     large_img.paste(img, (width, 0))                 # верхний правый
     large_img.paste(img, (0, height))                # нижний левый
     large_img.paste(img, (width, height))            # нижний правый
     
-    large_img.paste(img, (2*width, 0))
-    large_img.paste(img, (2*width, height))
-    large_img.paste(img, (2*width, 2*height))
-    large_img.paste(img, (0, 2*height))
-    large_img.paste(img, (width, 2*height))
-    large_img.paste(img, (2*width, 2*height))
+    # large_img.paste(img, (2*width, 0))
+    # large_img.paste(img, (2*width, height))
+    # large_img.paste(img, (2*width, 2*height))
+    # large_img.paste(img, (0, 2*height))
+    # large_img.paste(img, (width, 2*height))
+    # large_img.paste(img, (2*width, 2*height))
 
 
     # Сохраняем результат
@@ -55,7 +57,7 @@ def create_large_image_from_copies(input_path, output_path=None):
     
     print(f"Создано большое изображение: {output_path}")
     print(f"Размер исходного: {width}x{height}")
-    print(f"Размер результата: {width*3}x{height*3}")
+    print(f"Размер результата: {res_w}x{res_h}")
     
     return output_path
 

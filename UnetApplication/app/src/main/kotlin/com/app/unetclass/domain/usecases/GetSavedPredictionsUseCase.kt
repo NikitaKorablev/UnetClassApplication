@@ -1,11 +1,12 @@
 package com.app.unetclass.domain.usecases
 
-import com.app.unetclass.domain.repository.IPredictionHistoryRepository
-import com.app.unetclass.models.PredictionHistoryItem
 import android.content.Context
+import com.app.datastore.data.PredictionHistoryItem
+import com.app.datastore.domain.repository.PredictionHistoryRepository
+import javax.inject.Inject
 
-class GetSavedPredictionsUseCase(
-    private val repository: IPredictionHistoryRepository
+class GetSavedPredictionsUseCase @Inject constructor(
+    private val repository: PredictionHistoryRepository
 ) {
     suspend operator fun invoke(context: Context): List<PredictionHistoryItem> {
         return repository.getAllSavedPredictions(context)

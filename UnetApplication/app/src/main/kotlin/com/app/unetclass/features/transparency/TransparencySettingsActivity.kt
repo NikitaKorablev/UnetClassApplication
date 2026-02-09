@@ -1,6 +1,5 @@
 package com.app.unetclass.features.transparency
 
-import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Bundle

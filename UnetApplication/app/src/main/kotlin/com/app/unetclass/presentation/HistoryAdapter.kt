@@ -7,7 +7,7 @@ import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.app.unetclass.R
-import com.app.unetclass.models.PredictionHistoryItem
+import com.app.model.PredictionHistoryItem
 
 class HistoryAdapter(
     private val items: MutableList<PredictionHistoryItem> = mutableListOf(),

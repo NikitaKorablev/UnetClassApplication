@@ -20,6 +20,11 @@ dependencyResolutionManagement {
     }
 }
 
+enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 rootProject.name = "UnetClass"
 include(":app")
- 
+include(":core")
+include(":features:transparancy")
+include(":core:unet")
+include(":core:model")
+include(":core:datastore")

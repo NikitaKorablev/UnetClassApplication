@@ -8,7 +8,7 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.app.unetclass.R
 import com.app.unetclass.features.fullscreen.FullscreenActivity
-import com.app.unetclass.utils.ClassNames
+import com.core.data.ClassNames
 import java.io.File
 
 class DetailActivity : AppCompatActivity() {

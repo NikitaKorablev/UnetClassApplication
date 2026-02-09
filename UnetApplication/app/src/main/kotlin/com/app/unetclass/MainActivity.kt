@@ -11,23 +11,18 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.activity.viewModels
-import com.app.unetclass.data.TimeMeasurementService
 import com.app.unetclass.databinding.ActivityMainBinding
 import androidx.core.graphics.createBitmap
-import com.app.unetclass.domain.ITimeMeasurementUseCase
+import com.app.unet.domain.UnetModel
 import com.app.unetclass.features.detail.DetailActivity
 import com.app.unetclass.presentation.HistoryAdapter
-import com.app.unetclass.presentation.SegmentationPresenter
 import com.app.unetclass.features.transparency.TransparencySettingsActivity
 import com.app.unetclass.presentation.viewmodel.MainViewModel
 import com.app.unetclass.presentation.viewmodel.MainViewModelFactory
-import com.app.unetclass.utils.UnetModel
 
 class MainActivity : AppCompatActivity() {
     private lateinit var model: UnetModel
     private lateinit var binding: ActivityMainBinding
-    private lateinit var presenter: SegmentationPresenter
-    private lateinit var timeMeasurementService: ITimeMeasurementUseCase
     private lateinit var historyAdapter: HistoryAdapter
 
     // Получаем ViewModel с использованием фабрики
@@ -51,24 +46,12 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        model = UnetModel(applicationContext)
-
-        // Инициализация новых компонентов
-        timeMeasurementService = TimeMeasurementService()
-        presenter = SegmentationPresenter(
-            model,
-            timeMeasurementService
-        )
-
         // Инициализация RecyclerView и адаптера
         initRecyclerView()
 
         // Инициализация при первом запуске
         binding.predictBtn.isEnabled = false // Кнопка "Predict" отключена по умолчанию
         binding.moreInfoButton.isEnabled = false
-
-        // Восстановление состояния больше не требуется,
-        // так как данные теперь управляются через ViewModel
 
         // Подписка на LiveData из ViewModel
         observeViewModel()
@@ -94,7 +77,7 @@ class MainActivity : AppCompatActivity() {
 
                     // Формируем пути к маскам классов
                     val classMaskPaths = mutableListOf<String>()
-                    for (className in com.app.unetclass.utils.ClassNames.NAMES) {
+                    for (className in ClassNames.NAMES) {
                         val maskPath = "$lastSavedPath/${className}_prediction.png"
                         classMaskPaths.add(maskPath)
                     }

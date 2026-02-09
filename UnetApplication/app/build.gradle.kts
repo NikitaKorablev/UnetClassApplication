@@ -1,6 +1,8 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.hilt)
+    alias(libs.plugins.ksp)
     id("kotlin-parcelize")
 }
 
@@ -55,6 +57,15 @@ android {
 }
 
 dependencies {
+    implementation(projects.core.model)
+    implementation(projects.core.unet)
+    implementation(projects.core.datastore)
+
+    // Dagger-Hilt
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.compiler)
+    implementation(libs.work.runtime)
+
     implementation("org.pytorch:pytorch_android:2.1.0")
     implementation("org.pytorch:pytorch_android_torchvision:2.1.0")
 

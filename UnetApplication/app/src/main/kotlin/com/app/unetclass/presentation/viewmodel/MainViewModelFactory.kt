@@ -7,13 +7,12 @@ import com.app.unetclass.domain.ISegmentationUseCase
 
 class MainViewModelFactory(
     private val application: Application,
-    private val segmentationUseCase: ISegmentationUseCase
 ) : ViewModelProvider.Factory {
 
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(MainViewModel::class.java)) {
-            return MainViewModel(application, segmentationUseCase) as T
+            return MainViewModel(application) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

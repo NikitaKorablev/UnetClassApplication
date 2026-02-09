@@ -8,22 +8,22 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import com.app.unetclass.data.TimeMeasurementService
-import com.app.unetclass.domain.ISegmentationUseCase
-import com.app.unetclass.models.PredictionHistoryItem
-import com.app.unetclass.presentation.SegmentationPresenter
-import com.app.unetclass.utils.ResultState
-import com.app.unetclass.utils.UnetModel
+import com.app.model.ResultState
+import com.app.unet.utils.TimeMeasurementService
+import com.app.unetclass.domain.usecases.SegmentationUseCase
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
 
-class MainViewModel(
-    application: Application,
-    private val segmentationUseCase: ISegmentationUseCase
-) : AndroidViewModel(application) {
+class MainViewModel @Inject constructor(
+    @param:ApplicationContext
+    private val application: Application,
+    private val startSegmentation: SegmentationUseCase
 
-    // Создаем SegmentationPresenter с временным ITimeMeasurementUseCase
+    ) : AndroidViewModel(application) {
+
     private val timeMeasurementService = TimeMeasurementService()
     private val presenter = SegmentationPresenter(segmentationUseCase, timeMeasurementService)
 
@@ -75,7 +75,7 @@ class MainViewModel(
         viewModelScope.launch(Dispatchers.Default) {
             try {
                 Log.i(TAG, "Segmentation started")
-                val result = presenter.startSegmentation(inputBitmap) { historyItems ->
+                val result = startSegmentation(inputBitmap) { historyItems ->
                     // Обновляем список истории
                     val currentItems = _historyItems.value ?: emptyList()
                     _historyItems.value = historyItems + currentItems
