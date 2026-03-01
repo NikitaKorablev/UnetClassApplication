@@ -1,21 +1,16 @@
-package com.app.unetclass.data
+package com.app.unet.domain.usecases
 
-import android.content.Context
 import android.graphics.Bitmap
-import org.pytorch.Tensor
-import kotlin.math.min
 import androidx.core.graphics.createBitmap
-import com.app.unetclass.models.Tile
-import com.core.data.ClassNames
-import com.core.data.ImageStitcherResult
+import com.app.datastore.domain.repository.ImageRepository
+import com.app.model.Tile
+import com.app.unet.data.ImageStitcherResult
+import org.pytorch.Tensor
+import javax.inject.Inject
+import kotlin.collections.get
+import kotlin.math.min
 
-class ImageStitcher(
-    private val overlap: Int, // Размер перекрытия (e.g., 64)
-    private val numClasses: Int // Количество каналов (классов) в выходном тензоре (e.g., 6)
-) {
-    private var lastSavedPath: String = ""
-    private val halfOverlap = overlap / 2 // Половина перекрытия (e.g., 32)
-
+class StitchingImageUseCase {
     /**
      * Собирает предсказанные маски в одно полноразмерное изображение и маски для каждого класса.
      * Аналог glit_image.
@@ -26,7 +21,7 @@ class ImageStitcher(
      * @param originalHeight Высота исходного изображения.
      * @return Результат соединения: финальная маска и маски для каждого класса.
      */
-    fun stitchMasks(
+    operator fun invoke(
         outputTensors: List<Tensor>,
         tilesList: List<Tile>,
         originalWidth: Int,
@@ -38,13 +33,13 @@ class ImageStitcher(
 
         // Получаем размер фрагмента (256x256), предполагая квадратную плитку
         val tileSize = outputTensors[0].shape()[2].toInt() // H или W (256)
-        val uniqueArea = tileSize - overlap // Уникальная область (192)
+        val uniqueArea = tileSize - OVERLAP // Уникальная область (192)
 
         // Инициализация полноразмерного выходного массива (float32)
         // Размер: [H, W, numClasses]
         val finalMaskArray = Array(originalHeight) {
             Array(originalWidth) {
-                FloatArray(numClasses)
+                FloatArray(NUM_CLASSES)
             }
         }
 
@@ -63,8 +58,8 @@ class ImageStitcher(
             val outEndY = tileInfo.endY
 
             // Внутренние границы для уникальной области (получаем [64:192])
-            val uniqueStart = halfOverlap
-            val uniqueEnd = tileSize - halfOverlap // 256 - 32 = 224
+            val uniqueStart = HALF_OVERLAP
+            val uniqueEnd = tileSize - HALF_OVERLAP // 256 - 32 = 224
 
             // --- 1. Центральная область (Inner area) ---
             // Используется для всех, кроме краевых и угловых фрагментов в Python-коде,
@@ -72,8 +67,8 @@ class ImageStitcher(
             // и берем полный фрагмент для углов/краев по необходимости.
 
             // Внутренние индексы X и Y для текущего фрагмента
-            val tileYRange = uniqueStart until min(tileSize, outEndY - outStartY) - halfOverlap
-            val tileXRange = uniqueStart until min(tileSize, outEndX - outStartX) - halfOverlap
+            val tileYRange = uniqueStart until min(tileSize, outEndY - outStartY) - HALF_OVERLAP
+            val tileXRange = uniqueStart until min(tileSize, outEndX - outStartX) - HALF_OVERLAP
 
             // Цикл по уникальной области предсказания (например, [32:224])
             for (ty in tileYRange) {
@@ -83,7 +78,7 @@ class ImageStitcher(
 
                     // Проверка на выход за границы, на всякий случай
                     if (outX < originalWidth && outY < originalHeight) {
-                        for (c in 0 until numClasses) {
+                        for (c in 0 until NUM_CLASSES) {
                             // Индекс в плоском массиве outputData: [channel * size*size + y*size + x]
                             val index = c * tileSize * tileSize + ty * tileSize + tx
                             finalMaskArray[outY][outX][c] = outputData[index]
@@ -132,7 +127,7 @@ class ImageStitcher(
                 maxProb = -1.0f
 
                 // Найти класс с максимальной вероятностью (argmax)
-                for (c in 0 until numClasses) {
+                for (c in 0 until NUM_CLASSES) {
                     val prob = finalMaskArray[y][x][c]
                     if (prob > maxProb) {
                         maxProb = prob
@@ -144,7 +139,7 @@ class ImageStitcher(
                 // В вашем коде используется to_0_255_format_img, что подразумевает
                 // конвертацию в uint8. Для визуализации мы можем просто взять
                 // номер класса * 40 (для визуального различия)
-                val colorValue = (maxClass * (255 / (numClasses - 1))).coerceIn(0, 255)
+                val colorValue = (maxClass * (255 / (NUM_CLASSES - 1))).coerceIn(0, 255)
 
                 // Создание Grayscale цвета (RGB=value)
                 colors[y * width + x] = 0xFF shl 24 or (colorValue shl 16) or (colorValue shl 8) or colorValue
@@ -166,7 +161,7 @@ class ImageStitcher(
     ): List<Bitmap> {
         val classMasks = mutableListOf<Bitmap>()
 
-        for (classIndex in 0 until numClasses) {
+        for (classIndex in 0 until NUM_CLASSES) {
             val colors = IntArray(width * height)
 
             for (y in 0 until height) {
@@ -188,47 +183,11 @@ class ImageStitcher(
         return classMasks
     }
 
-    /**
-     * Сохраняет результаты сегментации в указанную папку
-     *
-     * @param result Результат сегментации
-     * @param context Контекст приложения для доступа к файловой системе
-     * @return true, если сохранение прошло успешно, иначе false
-     */
-    fun saveResults(result: ImageStitcherResult, context: Context): Boolean {
-        return try {
-            // Создаем уникальную папку для сохранения результатов
-            val resultsDir = ImageSaver.createResultsDirectory(context)
 
-            // Сохраняем путь для последующего использования
-            lastSavedPath = resultsDir.absolutePath
 
-            // Сохраняем финальную маску
-            val unitedMaskSaved = ImageSaver.saveImage(
-                result.unitedMask,
-                resultsDir,
-                "united_mask.png"
-            )
-
-            // Сохраняем маски для каждого класса с именами классов
-            var allClassMasksSaved = true
-            for (i in result.classMasks.indices) {
-                val classMaskSaved = ImageSaver.saveImage(
-                    result.classMasks[i],
-                    resultsDir,
-                    "${ClassNames.NAMES[i]}_prediction.png"
-                )
-                allClassMasksSaved = allClassMasksSaved && classMaskSaved
-            }
-
-            unitedMaskSaved && allClassMasksSaved
-        } catch (e: Exception) {
-            e.printStackTrace()
-            false
-        }
-    }
-    
-    fun getLastSavedPath(): String {
-        return lastSavedPath
+    companion object {
+        const val OVERLAP: Int = 128 // Размер перекрытия (e.g., 64)
+        const val NUM_CLASSES: Int = 6 // Количество каналов (классов) в выходном тензоре (e.g., 6)
+        const val HALF_OVERLAP = OVERLAP / 2 // Половина перекрытия (e.g., 32)
     }
 }

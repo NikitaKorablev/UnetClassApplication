@@ -2,25 +2,49 @@ package com.app.unet.domain
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.util.Log
 import com.app.model.ResultState
+import com.app.model.Tile
+import com.app.unet.data.Utils
+import com.app.unet.domain.models.SegmentationResult
+import com.app.unet.domain.usecases.SaveImageStitcherUseCase
+import com.app.unet.domain.usecases.SplitImageIntoTilesUseCase
+import com.app.unet.domain.usecases.StitchingImageUseCase
+import com.app.unet.domain.usecases.TilesToTensorsUseCase
+import dagger.hilt.android.qualifiers.ApplicationContext
+import org.pytorch.IValue
+import org.pytorch.Module
+import org.pytorch.Tensor
+import javax.inject.Inject
 
-class UnetModel(
-    private val context: Context
-) : ISegmentationUseCase {
-    private val imageProcessor: ImageProcessor = ImageProcessor(256, 128)
-    private val imageStitcher: ImageStitcher = ImageStitcher(128, 6)
-    private val model: InferenceModel = InferenceModel(context)
+class UnetModel @Inject constructor(
+    @ApplicationContext
+    context: Context,
+    private val stitchingImageUseCase: StitchingImageUseCase,
+    private val splitImageIntoTilesUseCase: SplitImageIntoTilesUseCase,
+    private val tilesToTensorsUseCase: TilesToTensorsUseCase,
+    private val saveImageStitcherUseCase: SaveImageStitcherUseCase,
+) {
+    private val module: Module
+    init {
+        val modelPath = Utils.assetFilePath(context, MODEL_ASSET_NAME)
+        module = Module.load(modelPath)
 
-    override suspend fun startSegmentation(bitmap: Bitmap): ResultState<SegmentationResult, String> {
+        Log.i(TAG, "PyTorch Mobile Model loaded successfully from $MODEL_ASSET_NAME")
+    }
+
+    fun startSegmentation(bitmap: Bitmap): ResultState<SegmentationResult, String> {
         val startTime = System.currentTimeMillis()
 
         try {
             // --- 1. Нарезка и подготовка тензоров (распил) ---
             val (tiles, tensors) = cutTensor(bitmap)
+
             // --- 2. Инференс (predict) ---
-            val outputTensors = model.predictBatch(tensors)
+            val outputTensors = predictBatch(tensors)
+
             // --- 3. Сборка (сборка) и Постобработка ---
-            val result = imageStitcher.stitchMasks(
+            val result = stitchingImageUseCase(
                 outputTensors,
                 tiles,
                 bitmap.width,
@@ -28,15 +52,10 @@ class UnetModel(
             )
 
             // Сохранение результатов
-            val success = imageStitcher.saveResults(result, context)
-            val outputPath = imageStitcher.getLastSavedPath() // Получаем путь к сохраненным результатам
-
-            if (!success) {
-                return ResultState.Error("Failed to save results")
-            }
+            val outputPath = saveImageStitcherUseCase(result)
+            outputPath ?: return ResultState.Error("Failed to save results")
 
             val totalTime = System.currentTimeMillis() - startTime
-
             return ResultState.Success(
                 SegmentationResult(
                     bitmap = result.unitedMask,
@@ -51,14 +70,29 @@ class UnetModel(
         }
     }
 
+    /**
+     * Выполняет предсказание для батча тензоров.
+     * Аналог model_pipeliner.predict(img_generator)
+     */
+    private fun predictBatch(tensors: List<Tensor>): List<Tensor> {
+        // PyTorch Mobile может принимать батч, если сконкатенировать тензоры.
+
+        return tensors.map { tensor ->
+            // IValue.from(tensor) создает аргумент для forward()
+            // .output.toTensor() извлекает тензор из результата
+            module.forward(IValue.from(tensor)).toTensor()
+        }
+    }
+
     private fun cutTensor(bitmap: Bitmap): Pair<List<Tile>, List<Tensor>> {
-        val tiles = imageProcessor.splitImageIntoTiles(bitmap)
-        val tensors = imageProcessor.getTensorsForInference(tiles)
+        val tiles = splitImageIntoTilesUseCase(bitmap)
+        val tensors = tilesToTensorsUseCase(tiles)
 
         return Pair(tiles, tensors)
     }
 
-    fun getLastSavedPath(): String {
-        return imageStitcher.getLastSavedPath()
+    companion object {
+        const val TAG = "UnetModel"
+        const val MODEL_ASSET_NAME = "traced_model.pt"
     }
 }

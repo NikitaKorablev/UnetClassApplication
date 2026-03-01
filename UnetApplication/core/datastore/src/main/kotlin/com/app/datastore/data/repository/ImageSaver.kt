@@ -1,4 +1,4 @@
-package com.app.unetclass.data
+package com.app.datastore.data.repository
 
 import android.content.ContentValues
 import android.content.Context
@@ -12,7 +12,7 @@ import java.util.Date
 import java.util.Locale
 
 object ImageSaver {
-    
+
     /**
      * Создает уникальную папку для сохранения результатов сегментации
      * Имя папки формируется по шаблону: yyyyMMdd_HHmmss
@@ -22,13 +22,13 @@ object ImageSaver {
         val picturesDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
         val unetClassDir = File(picturesDir, "UnetClass")
         unetClassDir.mkdirs()
-        
+
         val resultsDir = File(unetClassDir, timestamp)
         resultsDir.mkdirs()
-        
+
         return resultsDir
     }
-    
+
     /**
      * Сохраняет изображение в указанную папку
      */
@@ -42,7 +42,7 @@ object ImageSaver {
             false
         }
     }
-    
+
     /**
      * Сохраняет изображение через MediaStore (для Android 10+)
      */
@@ -53,10 +53,10 @@ object ImageSaver {
                 put(MediaStore.Images.Media.MIME_TYPE, "image/png")
                 put(MediaStore.Images.Media.RELATIVE_PATH, "${Environment.DIRECTORY_PICTURES}/UnetClass/$directoryName")
             }
-            
+
             return try {
                 val uri = context.contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
-                uri?.let { 
+                uri?.let {
                     context.contentResolver.openOutputStream(it)?.use { outputStream ->
                         bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
                     }
