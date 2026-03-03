@@ -1,23 +1,21 @@
-package com.app.transparancy
+package com.app.transparancy.data.repository
 
 import android.graphics.Bitmap
 import androidx.core.graphics.createBitmap
+import com.app.model.TransparencyType
 import com.app.transparancy.domain.repository.IImageOverlayProcessor
+import com.app.transparancy.presentation.model.TransparencyState
 
 class TransparencyImageProcessor : IImageOverlayProcessor {
     override fun overlayMasksWithTransparency(
-        classMasks: List<Bitmap>,
-        transparencyValues: List<Float>
+        classMasks: Map<TransparencyType, Bitmap>,
+        state: TransparencyState
     ): Bitmap {
-        require(classMasks.size == transparencyValues.size) {
-            "Количество масок должно совпадать с количеством значений прозрачности"
-        }
+        require(classMasks.isNotEmpty()) { "Список масок не может быть пустым" }
 
-        if (classMasks.isEmpty())
-            throw IllegalArgumentException("Список масок не может быть пустым")
-
-        val width = classMasks[0].width
-        val height = classMasks[0].height
+        val firstMask = classMasks.values.first()
+        val width = firstMask.width
+        val height = firstMask.height
         val numClasses = classMasks.size
 
         // Создаем массив для хранения "взвешенных" значений для каждого пикселя
@@ -25,12 +23,13 @@ class TransparencyImageProcessor : IImageOverlayProcessor {
         val weightedValues = Array(height) { Array(width) { IntArray(numClasses) } }
 
         // Вычисляем взвешенные значения для каждого класса
-        for ((classIndex, mask) in classMasks.withIndex()) {
-            val transparency = transparencyValues[classIndex].coerceIn(0.0f, 1.0f)
+
+        classMasks.entries.forEachIndexed { classIndex, (type, bitmap) ->
+            val transparency = state[type].coerceIn(0.0f, 1.0f)
 
             // Извлекаем значения из изображения маски класса
             val pixels = IntArray(width * height)
-            mask.getPixels(pixels, 0, width, 0, 0, width, height)
+            bitmap.getPixels(pixels, 0, width, 0, 0, width, height)
 
             for (y in 0 until height) {
                 for (x in 0 until width) {

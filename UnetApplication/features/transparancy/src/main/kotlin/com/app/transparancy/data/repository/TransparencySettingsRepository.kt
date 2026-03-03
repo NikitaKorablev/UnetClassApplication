@@ -1,4 +1,4 @@
-package com.app.transparancy
+package com.app.transparancy.data.repository
 
 import android.graphics.Bitmap
 import com.app.transparancy.domain.repository.ITransparencyImageSaver
