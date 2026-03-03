@@ -5,7 +5,7 @@ import android.graphics.BitmapFactory
 import androidx.lifecycle.ViewModel
 import com.app.datastore.domain.repository.ImageRepository
 import com.app.model.TransparencyType
-import com.app.transparancy.domain.repository.IImageOverlayProcessor
+import com.app.transparancy.domain.repository.TransparencyImageProcRepository
 import com.app.transparancy.presentation.model.TransparencyState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -16,7 +16,7 @@ import javax.inject.Inject
 import kotlin.collections.mapIndexed
 
 class TransparencyViewModel @Inject constructor(
-    val imageProcessor: IImageOverlayProcessor,
+    val imageProcessor: TransparencyImageProcRepository,
     val imageRepository: ImageRepository
 ) : ViewModel() {
     lateinit var classMasks: Map<TransparencyType, Bitmap>

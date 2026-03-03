@@ -4,7 +4,7 @@ import android.graphics.Bitmap
 import com.app.model.TransparencyType
 import com.app.transparancy.presentation.model.TransparencyState
 
-interface IImageOverlayProcessor {
+interface TransparencyImageProcRepository {
     /**
      * Накладывает маски классов на изображение с заданным уровнем прозракности
      * @param classMasks маски классов

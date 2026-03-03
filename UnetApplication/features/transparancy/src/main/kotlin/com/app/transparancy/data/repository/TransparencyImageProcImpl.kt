@@ -3,10 +3,10 @@ package com.app.transparancy.data.repository
 import android.graphics.Bitmap
 import androidx.core.graphics.createBitmap
 import com.app.model.TransparencyType
-import com.app.transparancy.domain.repository.IImageOverlayProcessor
+import com.app.transparancy.domain.repository.TransparencyImageProcRepository
 import com.app.transparancy.presentation.model.TransparencyState
 
-class TransparencyImageProcessor : IImageOverlayProcessor {
+class TransparencyImageProcImpl : TransparencyImageProcRepository {
     override fun overlayMasksWithTransparency(
         classMasks: Map<TransparencyType, Bitmap>,
         state: TransparencyState
