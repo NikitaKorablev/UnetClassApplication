@@ -5,39 +5,38 @@ import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.activity.viewModels
 import com.app.unetclass.databinding.ActivityMainBinding
-import androidx.core.graphics.createBitmap
-import com.app.unet.domain.UnetModel
 import com.app.unetclass.features.detail.DetailActivity
 import com.app.unetclass.presentation.HistoryAdapter
-import com.app.unetclass.features.transparency.TransparencySettingsActivity
 import com.app.unetclass.presentation.viewmodel.MainViewModel
-import com.app.unetclass.presentation.viewmodel.MainViewModelFactory
+import com.app.unetclass.utils.AppNavigationComponent
+import com.app.unetclass.utils.MainActivityNav
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
-    private lateinit var model: UnetModel
+    @Inject
+    lateinit var router: AppNavigationComponent
+
     private lateinit var binding: ActivityMainBinding
     private lateinit var historyAdapter: HistoryAdapter
 
     // Получаем ViewModel с использованием фабрики
-    private val viewModel: MainViewModel by viewModels {
-        MainViewModelFactory(application, model)
-    }
+    private val viewModel: MainViewModel by viewModels()
 
     // Современный способ получения результата из другого Activity
     private val pickImage = registerForActivityResult(
         ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
         uri?.let {
-            val originalBitmap = MediaStore.Images.Media.getBitmap(contentResolver, it)
-            val grayscaleBitmap = toGrayscale(originalBitmap)
-            viewModel.setSelectedImage(grayscaleBitmap, it)
+            val bitmap = MediaStore.Images.Media.getBitmap(contentResolver, it)
+            viewModel.setSelectedImage(bitmap, it)
         }
     }
 
@@ -68,26 +67,10 @@ class MainActivity : AppCompatActivity() {
         }
 
         binding.settingsBtn.setOnClickListener {
-            // Открываем TransparencySettingsActivity с текущим изображением
-            val intent = Intent(this, TransparencySettingsActivity::class.java).apply {
-                // Передаем путь к последнему сохраненному результату
-                val lastSavedPath = model.getLastSavedPath()
-                if (lastSavedPath.isNotEmpty()) {
-                    putExtra("result_path", lastSavedPath)
-
-                    // Формируем пути к маскам классов
-                    val classMaskPaths = mutableListOf<String>()
-                    for (className in ClassNames.NAMES) {
-                        val maskPath = "$lastSavedPath/${className}_prediction.png"
-                        classMaskPaths.add(maskPath)
-                    }
-                    putStringArrayListExtra("class_masks_paths", ArrayList(classMaskPaths))
-                } else {
-                    Log.e(TAG, "No segmentation results available. Please run segmentation first.")
-                    return@setOnClickListener
-                }
-            }
-            startActivity(intent)
+            (router as MainActivityNav).toTransparencySettings(
+                this,
+                viewModel.lastSavedPath
+            )
         }
 
         binding.moreInfoButton.setOnClickListener {
@@ -135,35 +118,6 @@ class MainActivity : AppCompatActivity() {
             null
         }
     }
-
-    /**
-     * Конвертирует цветное изображение в оттенки серого.
-     */
-    private fun toGrayscale(bmpOriginal: Bitmap): Bitmap {
-        val width = bmpOriginal.width
-        val height = bmpOriginal.height
-
-        // Создаем новое изображение в формате RGB_565 (или ARGB_8888, в зависимости от нужд)
-        val grayscaleBitmap = createBitmap(width, height)
-
-        val pixels = IntArray(width * height)
-        bmpOriginal.getPixels(pixels, 0, width, 0, 0, width, height)
-
-        // Преобразовать RGB в градации серого
-        for (i in pixels.indices) {
-             val r = (pixels[i] shr 16) and 0xFF
-             val g = (pixels[i] shr 8) and 0xFF
-             val b = pixels[i] and 0xFF
-             val gray = (0.299 * r + 0.587 * g + 0.114 * b).toInt()
-             pixels[i] = (gray shl 16) or (gray shl 8) or gray or (0xFF shl 24) // ARGB
-        }
-
-        grayscaleBitmap.setPixels(pixels, 0, width, 0, 0, width, height)
-        return grayscaleBitmap
-    }
-
-    // Методы для работы с временными файлами больше не требуются,
-    // так как состояние теперь управляется через ViewModel
 
     private fun observeViewModel() {
         // Подписка на изменения bitmap

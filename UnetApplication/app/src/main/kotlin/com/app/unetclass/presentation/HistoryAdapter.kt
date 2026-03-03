@@ -6,13 +6,13 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
+import com.app.datastore.data.PredictionHistoryItem
 import com.app.unetclass.R
-import com.app.model.PredictionHistoryItem
 
 class HistoryAdapter(
     private val items: MutableList<PredictionHistoryItem> = mutableListOf(),
     private val onItemClick: (PredictionHistoryItem) -> Unit
-) : RecyclerView.Adapter<HistoryAdapter.HistoryViewHolder>() {
+): RecyclerView.Adapter<HistoryAdapter.HistoryViewHolder>() {
 
     private var selectedPosition = RecyclerView.NO_POSITION
 

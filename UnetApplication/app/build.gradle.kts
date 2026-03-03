@@ -57,9 +57,11 @@ android {
 }
 
 dependencies {
+    implementation(projects.core.domain)
     implementation(projects.core.model)
     implementation(projects.core.unet)
     implementation(projects.core.datastore)
+    implementation(projects.features.transparancy)
 
     // Dagger-Hilt
     implementation(libs.hilt.android)
@@ -83,8 +85,8 @@ dependencies {
     implementation(libs.androidx.constraintlayout)
 
     // ViewModel
-    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0")
-    implementation("androidx.activity:activity-ktx:1.8.0")
+    implementation(libs.androidx.lifecycle.viewmodel.ktx)
+    implementation(libs.androidx.activity.ktx)
 
     // PhotoView для масштабирования изображений
     implementation("com.github.chrisbanes:PhotoView:2.3.0")

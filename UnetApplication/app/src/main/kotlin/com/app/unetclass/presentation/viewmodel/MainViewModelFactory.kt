@@ -3,16 +3,12 @@ package com.app.unetclass.presentation.viewmodel
 import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.app.unetclass.domain.ISegmentationUseCase
 
-class MainViewModelFactory(
-    private val application: Application,
-) : ViewModelProvider.Factory {
-
+class MainViewModelFactory : ViewModelProvider.Factory {
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(MainViewModel::class.java)) {
-            return MainViewModel(application) as T
+            return MainViewModel as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

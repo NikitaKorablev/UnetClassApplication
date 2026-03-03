@@ -14,7 +14,9 @@ import java.util.Locale
 
 // TODO: DEPRICATED
 
-/**DEPRECATED**/
+@Deprecated(
+    message = "Использовать ImageRepository"
+)
 object ImageSaver {
 
     /**

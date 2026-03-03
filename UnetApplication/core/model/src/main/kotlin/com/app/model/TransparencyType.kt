@@ -1,3 +1,5 @@
 package com.app.model
 
-data class TransparencyType()
+enum class TransparencyType {
+    MITOCHONDRIA, PSD, VESICLES, AXON, BOUNDARIES, MITO_BOUNDARIES
+}

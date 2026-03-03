@@ -4,12 +4,13 @@ import android.app.Application
 import android.graphics.Bitmap
 import android.net.Uri
 import android.util.Log
+import androidx.core.graphics.createBitmap
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import com.app.datastore.data.PredictionHistoryItem
 import com.app.model.ResultState
-import com.app.unet.utils.TimeMeasurementService
 import com.app.unetclass.domain.usecases.SegmentationUseCase
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
@@ -20,13 +21,8 @@ import javax.inject.Inject
 class MainViewModel @Inject constructor(
     @param:ApplicationContext
     private val application: Application,
-    private val startSegmentation: SegmentationUseCase
-
-    ) : AndroidViewModel(application) {
-
-    private val timeMeasurementService = TimeMeasurementService()
-    private val presenter = SegmentationPresenter(segmentationUseCase, timeMeasurementService)
-
+    private val startSegmentation: SegmentationUseCase,
+): AndroidViewModel(application) {
     // LiveData для изображения
     private val _bitmap = MutableLiveData<Bitmap?>()
     val bitmap: LiveData<Bitmap?> = _bitmap
@@ -54,12 +50,15 @@ class MainViewModel @Inject constructor(
     val segmentationResult: LiveData<Bitmap?> = _segmentationResult
 
     private var segmentationIsStarted = false
+    private var _lastSavedPath = ""
+    val lastSavedPath: String
+        get() = _lastSavedPath
 
     /**
      * Устанавливает выбранное изображение
      */
-    fun setSelectedImage(bitmap: Bitmap?, uri: Uri? = null) {
-        _bitmap.value = bitmap
+    fun setSelectedImage(bitmap: Bitmap, uri: Uri? = null) {
+        _bitmap.value = toGrayscale(bitmap)
         _selectedImageUri.value = uri
         buttonsStateManager.imageSelected()
     }
@@ -71,7 +70,6 @@ class MainViewModel @Inject constructor(
         if (segmentationIsStarted) return // Предотвращение повторного запуска
 
         segmentationIsStarted = true
-
         viewModelScope.launch(Dispatchers.Default) {
             try {
                 Log.i(TAG, "Segmentation started")
@@ -85,6 +83,7 @@ class MainViewModel @Inject constructor(
                     when (result) {
                         is ResultState.Success -> {
                             Log.i(TAG, "Segmentation success")
+                            _lastSavedPath = result.data.outputPath
                             _segmentationResult.value = result.data.bitmap
                             _bitmap.value = result.data.bitmap
                             _errorMessage.value = null
@@ -155,6 +154,32 @@ class MainViewModel @Inject constructor(
             e.printStackTrace()
             null
         }
+    }
+
+    /**
+     * Конвертирует цветное изображение в оттенки серого.
+     */
+    private fun toGrayscale(bmpOriginal: Bitmap): Bitmap {
+        val width = bmpOriginal.width
+        val height = bmpOriginal.height
+
+        // Создаем новое изображение в формате RGB_565 (или ARGB_8888, в зависимости от нужд)
+        val grayscaleBitmap = createBitmap(width, height)
+
+        val pixels = IntArray(width * height)
+        bmpOriginal.getPixels(pixels, 0, width, 0, 0, width, height)
+
+        // Преобразовать RGB в градации серого
+        for (i in pixels.indices) {
+            val r = (pixels[i] shr 16) and 0xFF
+            val g = (pixels[i] shr 8) and 0xFF
+            val b = pixels[i] and 0xFF
+            val gray = (0.299 * r + 0.587 * g + 0.114 * b).toInt()
+            pixels[i] = (gray shl 16) or (gray shl 8) or gray or (0xFF shl 24) // ARGB
+        }
+
+        grayscaleBitmap.setPixels(pixels, 0, width, 0, 0, width, height)
+        return grayscaleBitmap
     }
 
     /**
