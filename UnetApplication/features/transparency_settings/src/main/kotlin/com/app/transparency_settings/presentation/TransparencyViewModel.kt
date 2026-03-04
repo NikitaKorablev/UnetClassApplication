@@ -3,31 +3,44 @@ package com.app.transparency_settings.presentation
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.app.datastore.domain.repository.ImageRepository
 import com.app.model.TransparencyType
 import com.app.transparency_settings.domain.repository.TransparencyImageProcRepository
 import com.app.transparency_settings.presentation.model.TransparencyState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import java.io.File
 import javax.inject.Inject
 import kotlin.collections.mapIndexed
 
+@OptIn(FlowPreview::class)
 @HiltViewModel
 class TransparencyViewModel @Inject constructor(
     val imageProcessor: TransparencyImageProcRepository,
     val imageRepository: ImageRepository
 ) : ViewModel() {
-    lateinit var classMasks: Map<TransparencyType, Bitmap>
-    lateinit var outputPath: String
+    private lateinit var outputPath: String
+    private lateinit var classMasks: Map<TransparencyType, Bitmap>
 
     private val _state = MutableStateFlow(TransparencyState())
     val state: StateFlow<TransparencyState> = _state.asStateFlow()
 
-    fun setupData(
+    init {
+        _state
+            .debounce(200)
+            .onEach {  }
+            .launchIn(viewModelScope)
+    }
+
+    suspend fun setupData(
         bitmapPaths: ArrayList<String>?,
         bitmapArray: ArrayList<Bitmap>?,
         resultPath: String,
@@ -79,7 +92,9 @@ class TransparencyViewModel @Inject constructor(
     }
 
     fun getPreviewImage(): Bitmap {
-        return imageProcessor.overlayMasksWithTransparency(classMasks, state.value)
+        return imageProcessor.overlayMasksWithTransparency(
+            classMasks, state.value
+        )
     }
 
     fun savePreviewImage(): Boolean {

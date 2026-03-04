@@ -9,7 +9,10 @@ import androidx.lifecycle.lifecycleScope
 import com.app.model.TransparencyType
 import com.app.transparency_settings.databinding.ActivityTransparencySettingsBinding
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @AndroidEntryPoint
 class TransparencySettingsActivity : AppCompatActivity() {
@@ -24,7 +27,7 @@ class TransparencySettingsActivity : AppCompatActivity() {
         setupSeekBars()
         setupData()
         setupSaveButton()
-        updatePreviewImage()
+        subscribeOnPreviewImage()
     }
 
     private fun setupSeekBars() {
@@ -40,7 +43,7 @@ class TransparencySettingsActivity : AppCompatActivity() {
         seekBarMap.forEach { (seekBar, type) ->
             seekBar.onProgressChanged { value ->
                 viewModel.updateTransparency(type, value)
-                updatePreviewImage()
+//                updatePreviewImage()
             }
         }
     }
@@ -59,12 +62,22 @@ class TransparencySettingsActivity : AppCompatActivity() {
         val resultPath = intent.getStringExtra("result_path")
 
         require(resultPath != null) { "Не найден путь для сохранения изображений" }
-        viewModel.setupData(bitmapPaths, bitmapArray, resultPath)
+
+        lifecycleScope.launch {
+            viewModel.setupData(bitmapPaths, bitmapArray, resultPath)
+        }
     }
 
-    private fun updatePreviewImage() {
-        val preview = viewModel.getPreviewImage()
-        binding.previewImageView.setImageBitmap(preview)
+    private fun subscribeOnPreviewImage() {
+        lifecycleScope.launch(Dispatchers.Default) {
+            viewModel.state.collect {
+                val preview = viewModel.getPreviewImage()
+
+                withContext(Dispatchers.Main) {
+                    binding.previewImageView.setImageBitmap(preview)
+                }
+            }
+        }
     }
 
     private fun savePreviewImage() {
