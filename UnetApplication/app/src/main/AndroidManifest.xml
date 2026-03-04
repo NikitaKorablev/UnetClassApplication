@@ -35,7 +35,7 @@
             android:theme="@style/Theme.AppCompat.NoActionBar" />
 
         <activity
-            android:name="com.app.transparancy.presentation.TransparencySettingsActivity"
+            android:name="com.app.transparency_settings.presentation.TransparencySettingsActivity"
             android:exported="false" />
     </application>
 

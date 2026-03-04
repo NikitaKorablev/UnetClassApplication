@@ -14,7 +14,7 @@ class PredictionHistoryRepositoryImpl
     }
 
     override suspend fun getAllSavedPredictions(context: Context): List<PredictionHistoryItem> {
-        val directories = getAllPredictionDirectories(context)
+        val directories = getAllPredictionDirectories()
         val historyItems = mutableListOf<PredictionHistoryItem>()
 
         for (directory in directories) {
@@ -28,7 +28,7 @@ class PredictionHistoryRepositoryImpl
         return historyItems.sortedByDescending { it.timestamp }
     }
 
-    private fun getAllPredictionDirectories(context: Context): List<File> {
+    private fun getAllPredictionDirectories(): List<File> {
         val picturesDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
         val unetClassDir = File(picturesDir, "UnetClass")
         if (!unetClassDir.exists()) return emptyList()
@@ -76,19 +76,17 @@ class PredictionHistoryRepositoryImpl
     }
 
     private fun createHistoryItemFromDirectory(directory: File): PredictionHistoryItem? {
-        if (!isPredictionDirectoryValid(directory)) {
-            return null
-        }
+        if (!isPredictionDirectoryValid(directory)) return null
+
 
         // Извлекаем временную метку из имени папки
         val timestamp = directory.name
         val outputPath = directory.absolutePath
 
         // Получаем размерности изображения
-        val dimensions = getImageDimensions(File(directory, "united_mask.png").absolutePath)
-        if (dimensions == null) {
-            return null
-        }
+        val dimensions = getImageDimensions(
+            File(directory, "united_mask.png").absolutePath
+        ) ?: return null
 
         val (width, height) = dimensions
 
@@ -100,5 +98,4 @@ class PredictionHistoryRepositoryImpl
             imageHeight = height
         )
     }
-
 }

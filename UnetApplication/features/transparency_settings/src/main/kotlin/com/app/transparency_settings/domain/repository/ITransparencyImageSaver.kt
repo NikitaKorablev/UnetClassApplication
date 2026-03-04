@@ -1,4 +1,4 @@
-package com.app.transparancy.domain.repository
+package com.app.transparency_settings.domain.repository
 
 import android.graphics.Bitmap
 

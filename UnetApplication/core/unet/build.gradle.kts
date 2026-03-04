@@ -46,15 +46,15 @@ dependencies {
     implementation(libs.work.runtime)
 
     //PyTorch
-    implementation("org.pytorch:pytorch_android:2.1.0")
-    implementation("org.pytorch:pytorch_android_torchvision:2.1.0")
+    implementation(libs.pytorch.android)
+    implementation(libs.pytorch.android.torchvision)
 
     // Glide для загрузки и кэширования изображений
-    implementation("com.github.bumptech.glide:glide:4.15.1")
-    annotationProcessor("com.github.bumptech.glide:compiler:4.15.1")
+    implementation(libs.glide)
+    annotationProcessor(libs.compiler)
 
     // PhotoView для масштабирования изображений
-    implementation("com.github.chrisbanes:PhotoView:2.3.0")
+    implementation(libs.photoview)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)

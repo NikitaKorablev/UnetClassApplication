@@ -1,8 +1,8 @@
-package com.app.transparancy.domain.repository
+package com.app.transparency_settings.domain.repository
 
 import android.graphics.Bitmap
 import com.app.model.TransparencyType
-import com.app.transparancy.presentation.model.TransparencyState
+import com.app.transparency_settings.presentation.model.TransparencyState
 
 interface TransparencyImageProcRepository {
     /**

@@ -1,12 +1,12 @@
-package com.app.transparancy.presentation
+package com.app.transparency_settings.presentation
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import androidx.lifecycle.ViewModel
 import com.app.datastore.domain.repository.ImageRepository
 import com.app.model.TransparencyType
-import com.app.transparancy.domain.repository.TransparencyImageProcRepository
-import com.app.transparancy.presentation.model.TransparencyState
+import com.app.transparency_settings.domain.repository.TransparencyImageProcRepository
+import com.app.transparency_settings.presentation.model.TransparencyState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

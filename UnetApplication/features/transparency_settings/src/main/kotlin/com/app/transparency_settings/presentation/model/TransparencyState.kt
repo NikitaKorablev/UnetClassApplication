@@ -1,4 +1,4 @@
-package com.app.transparancy.presentation.model
+package com.app.transparency_settings.presentation.model
 
 import com.app.model.TransparencyType
 

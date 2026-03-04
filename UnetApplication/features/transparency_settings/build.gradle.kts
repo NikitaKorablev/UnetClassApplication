@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.app.transparancy"
+    namespace = "com.app.transparency_settings"
     compileSdk {
         version = release(36)
     }

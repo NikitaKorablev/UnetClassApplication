@@ -1,17 +1,15 @@
-package com.app.transparancy.presentation
+package com.app.transparency_settings.presentation
 
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.widget.SeekBar
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.app.model.TransparencyType
-import com.app.transparancy.databinding.ActivityTransparencySettingsBinding
+import com.app.transparency_settings.databinding.ActivityTransparencySettingsBinding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
-import java.io.File
 
 @AndroidEntryPoint
 class TransparencySettingsActivity : AppCompatActivity() {

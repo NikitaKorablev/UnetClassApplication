@@ -2,7 +2,7 @@ package com.app.unetclass.utils
 
 import android.content.Context
 import android.content.Intent
-import com.app.transparancy.presentation.TransparencySettingsActivity
+import com.app.transparency_settings.presentation.TransparencySettingsActivity
 import com.app.unet.utils.ClassNames
 
 class AppNavigationComponent: MainActivityNav {

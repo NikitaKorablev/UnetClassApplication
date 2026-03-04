@@ -61,15 +61,12 @@ dependencies {
     implementation(projects.core.model)
     implementation(projects.core.unet)
     implementation(projects.core.datastore)
-    implementation(projects.features.transparancy)
+    implementation(projects.features.transparencySettings)
 
     // Dagger-Hilt
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
     implementation(libs.work.runtime)
-
-    implementation("org.pytorch:pytorch_android:2.1.0")
-    implementation("org.pytorch:pytorch_android_torchvision:2.1.0")
 
 //    // Ядро PyTorch Mobile
 //    implementation("org.pytorch:pytorch_android_lite:1.13.0")

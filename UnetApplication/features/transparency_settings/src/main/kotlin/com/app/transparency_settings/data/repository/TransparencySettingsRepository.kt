@@ -1,7 +1,7 @@
-package com.app.transparancy.data.repository
+package com.app.transparency_settings.data.repository
 
 import android.graphics.Bitmap
-import com.app.transparancy.domain.repository.ITransparencyImageSaver
+import com.app.transparency_settings.domain.repository.ITransparencyImageSaver
 import java.io.File
 
 class TransparencySettingsRepository : ITransparencyImageSaver {
