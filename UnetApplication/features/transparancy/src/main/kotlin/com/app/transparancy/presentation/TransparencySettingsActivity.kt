@@ -9,9 +9,11 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.app.model.TransparencyType
 import com.app.transparancy.databinding.ActivityTransparencySettingsBinding
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import java.io.File
 
+@AndroidEntryPoint
 class TransparencySettingsActivity : AppCompatActivity() {
     private lateinit var binding: ActivityTransparencySettingsBinding
     private val viewModel: TransparencyViewModel by viewModels()

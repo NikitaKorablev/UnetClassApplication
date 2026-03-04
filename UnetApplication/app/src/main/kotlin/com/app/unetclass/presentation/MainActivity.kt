@@ -1,28 +1,30 @@
-package com.app.unetclass
+package com.app.unetclass.presentation
 
 import android.content.Intent
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.activity.viewModels
+import com.app.domain.utils.Router
 import com.app.unetclass.databinding.ActivityMainBinding
 import com.app.unetclass.features.detail.DetailActivity
-import com.app.unetclass.presentation.HistoryAdapter
 import com.app.unetclass.presentation.viewmodel.MainViewModel
 import com.app.unetclass.utils.AppNavigationComponent
 import com.app.unetclass.utils.MainActivityNav
 import dagger.hilt.android.AndroidEntryPoint
+import java.io.File
 import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
     @Inject
-    lateinit var router: AppNavigationComponent
+    lateinit var router: Router
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var historyAdapter: HistoryAdapter
@@ -107,9 +109,9 @@ class MainActivity : AppCompatActivity() {
 
     private fun loadBitmapFromPath(imagePath: String): Bitmap? {
         return try {
-            val file = java.io.File(imagePath)
+            val file = File(imagePath)
             if (file.exists()) {
-                android.graphics.BitmapFactory.decodeFile(file.absolutePath)
+                BitmapFactory.decodeFile(file.absolutePath)
             } else {
                 null
             }

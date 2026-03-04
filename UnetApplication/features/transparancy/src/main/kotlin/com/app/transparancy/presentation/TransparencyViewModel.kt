@@ -7,6 +7,7 @@ import com.app.datastore.domain.repository.ImageRepository
 import com.app.model.TransparencyType
 import com.app.transparancy.domain.repository.TransparencyImageProcRepository
 import com.app.transparancy.presentation.model.TransparencyState
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -15,6 +16,7 @@ import java.io.File
 import javax.inject.Inject
 import kotlin.collections.mapIndexed
 
+@HiltViewModel
 class TransparencyViewModel @Inject constructor(
     val imageProcessor: TransparencyImageProcRepository,
     val imageRepository: ImageRepository

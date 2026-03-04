@@ -6,9 +6,9 @@ import android.widget.ImageButton
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.app.unet.utils.ClassNames
 import com.app.unetclass.R
 import com.app.unetclass.features.fullscreen.FullscreenActivity
-import com.core.data.ClassNames
 import java.io.File
 
 class DetailActivity : AppCompatActivity() {
@@ -81,7 +81,7 @@ class DetailActivity : AppCompatActivity() {
     private fun extractClassNameFromFile(fileName: String): String? {
         // Ищем, соответствует ли имя файла шаблону className_prediction.png
         for (className in ClassNames.NAMES) {
-            if (fileName.startsWith("$className" + "_prediction.")) {
+            if (fileName.startsWith(className + "_prediction.")) {
                 return className
             }
         }

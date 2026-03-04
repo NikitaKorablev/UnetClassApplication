@@ -8,21 +8,22 @@ import androidx.core.graphics.createBitmap
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.app.datastore.data.PredictionHistoryItem
 import com.app.model.ResultState
 import com.app.unetclass.domain.usecases.SegmentationUseCase
+import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
+@HiltViewModel
 class MainViewModel @Inject constructor(
-    @param:ApplicationContext
-    private val application: Application,
     private val startSegmentation: SegmentationUseCase,
-): AndroidViewModel(application) {
+): ViewModel() {
     // LiveData для изображения
     private val _bitmap = MutableLiveData<Bitmap?>()
     val bitmap: LiveData<Bitmap?> = _bitmap
