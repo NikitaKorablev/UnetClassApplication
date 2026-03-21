@@ -3,14 +3,14 @@ package com.app.unetclass.domain.usecases
 import android.graphics.Bitmap
 import com.app.datastore.data.PredictionHistoryItem
 import com.app.model.ResultState
-import com.app.unet.domain.UnetModel
+import com.app.unet.data.unetmodels.PyTorchModel
 import com.app.unet.domain.models.SegmentationResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 class SegmentationUseCase @Inject constructor(
-    private val model: UnetModel,
+    private val model: PyTorchModel,
 ) {
     suspend operator fun invoke(
         bitmap: Bitmap,

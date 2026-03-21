@@ -1,6 +1,7 @@
 package com.app.unet.di
 
 import android.content.Context
+import com.app.unet.data.unetmodels.PyTorchModel
 import com.app.unet.domain.UnetModel
 import com.app.unet.domain.usecases.SaveImageStitcherUseCase
 import com.app.unet.domain.usecases.SplitImageIntoTilesUseCase
@@ -25,7 +26,7 @@ class Modules {
         splitImageIntoTilesUseCase: SplitImageIntoTilesUseCase,
         tilesToTensorsUseCase: TilesToTensorsUseCase,
         saveImageStitcherUseCase: SaveImageStitcherUseCase
-    ) = UnetModel(
+    ): UnetModel = PyTorchModel(
         context,
         stitchingImageUseCase,
         splitImageIntoTilesUseCase,
