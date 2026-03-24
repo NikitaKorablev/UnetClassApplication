@@ -6,7 +6,7 @@ import android.widget.ImageButton
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.app.unet.utils.ClassNames
+import com.app.model.ClassNames
 import com.app.unetclass.R
 import com.app.unetclass.features.fullscreen.FullscreenActivity
 import java.io.File

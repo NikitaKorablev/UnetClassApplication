@@ -1,20 +1,19 @@
 package com.app.unetclass.presentation.viewmodel
 
-import android.app.Application
 import android.graphics.Bitmap
 import android.net.Uri
 import android.util.Log
 import androidx.core.graphics.createBitmap
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.app.datastore.data.PredictionHistoryItem
 import com.app.model.ResultState
+import com.app.unetclass.domain.usecases.SaveImageStitcherUseCase
 import com.app.unetclass.domain.usecases.SegmentationUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -23,6 +22,7 @@ import javax.inject.Inject
 @HiltViewModel
 class MainViewModel @Inject constructor(
     private val startSegmentation: SegmentationUseCase,
+    private val saveImageStitcher: SaveImageStitcherUseCase
 ): ViewModel() {
     // LiveData для изображения
     private val _bitmap = MutableLiveData<Bitmap?>()
@@ -71,41 +71,39 @@ class MainViewModel @Inject constructor(
         if (segmentationIsStarted) return // Предотвращение повторного запуска
 
         segmentationIsStarted = true
-        viewModelScope.launch(Dispatchers.Default) {
-            try {
-                Log.i(TAG, "Segmentation started")
-                val result = startSegmentation(inputBitmap) { historyItems ->
-                    // Обновляем список истории
-                    val currentItems = _historyItems.value ?: emptyList()
-                    _historyItems.value = historyItems + currentItems
-                }
+        viewModelScope.launch(
+            Dispatchers.Default + CoroutineExceptionHandler { _, throwable ->
+                throwable.printStackTrace()
+                Log.e(TAG, "Segmentation error")
+                segmentationIsStarted = false
+                _errorMessage.postValue(throwable.message)
+                buttonsStateManager.enableButtons()
+            }
+        ) {
+            Log.d(TAG, "Segmentation started")
+            val result = startSegmentation(inputBitmap) { historyItems ->
+                // Обновляем список истории
+                val currentItems = _historyItems.value ?: emptyList()
+                _historyItems.value = historyItems + currentItems
+            }
 
-                withContext(Dispatchers.Main) {
-                    when (result) {
-                        is ResultState.Success -> {
-                            Log.i(TAG, "Segmentation success")
-                            _lastSavedPath = result.data.outputPath
-                            _segmentationResult.value = result.data.bitmap
-                            _bitmap.value = result.data.bitmap
-                            _errorMessage.value = null
-                        }
-                        is ResultState.Error -> {
-                            Log.e(TAG, "Segmentation error")
-                            _errorMessage.value = result.error
-                        }
+            when(result) {
+                is ResultState.Success -> {
+                    val unitedMask = result.data.labeledData.unitedMask()
+                    val outputPath = saveImageStitcher(
+                        unitedMask,
+                        result.data.labeledData.labels.map { it.getMask().bitmap }
+                    )
+
+                    Log.d(TAG, "Segmentation success")
+                    withContext(Dispatchers.Main) {
+                        _lastSavedPath = outputPath
+                        _segmentationResult.value = unitedMask
+                        _bitmap.value = unitedMask
+                        _errorMessage.value = null
                     }
                 }
-            } catch (e: Exception) {
-                withContext(Dispatchers.Main) {
-                    Log.e(TAG, "Segmentation error")
-                    _errorMessage.value = e.message
-                }
-            } finally {
-                segmentationIsStarted = false
-                withContext(Dispatchers.Main) {
-                    buttonsStateManager.enableButtons()
-                }
-//                _isButtonsEnabled.value = true
+                is ResultState.Error -> throw Exception(result.error)
             }
         }
     }

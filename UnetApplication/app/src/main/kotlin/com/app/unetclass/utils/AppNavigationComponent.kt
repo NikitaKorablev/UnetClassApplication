@@ -3,7 +3,7 @@ package com.app.unetclass.utils
 import android.content.Context
 import android.content.Intent
 import com.app.transparency_settings.presentation.TransparencySettingsActivity
-import com.app.unet.utils.ClassNames
+import com.app.model.ClassNames
 
 class AppNavigationComponent: MainActivityNav {
     override fun toTransparencySettings(context: Context, lastSavedPath: String) {

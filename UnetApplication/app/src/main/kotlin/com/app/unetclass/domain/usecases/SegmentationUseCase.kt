@@ -2,38 +2,40 @@ package com.app.unetclass.domain.usecases
 
 import android.graphics.Bitmap
 import com.app.datastore.data.PredictionHistoryItem
+import com.app.model.ImageData
 import com.app.model.ResultState
 import com.app.unet.data.unetmodels.PyTorchModel
-import com.app.unet.domain.models.SegmentationResult
+import com.app.unetclass.domain.usecases.SaveImageStitcherUseCase
+import com.app.unet.models.SegmentationResult
+import com.app.unet.domain.usecases.SplitImageIntoTilesUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 class SegmentationUseCase @Inject constructor(
     private val model: PyTorchModel,
+    private val imageToTiles: SplitImageIntoTilesUseCase,
 ) {
-    suspend operator fun invoke(
+    operator fun invoke(
         bitmap: Bitmap,
         onHistoryUpdate: (List<PredictionHistoryItem>) -> Unit
     ): ResultState<SegmentationResult, String> {
-        val result = model.startSegmentation(bitmap)
+        val tiles = imageToTiles(bitmap)
 
-        // Если сегментация успешна, обновить историю
-        if (result is ResultState.Success) {
-            val historyItem = PredictionHistoryItem(
-                timestamp = result.data.outputPath.substringAfterLast("/"),
-                executionTime = result.data.totalTimeMs,
-                outputPath = result.data.outputPath,
-                imageWidth = result.data.imageWidth,
-                imageHeight = result.data.imageHeight
+        val startTime = System.currentTimeMillis()
+        val result = model.predict(
+            ImageData(bitmap.width, bitmap.height, tiles)
+        )
+        val totalTime = System.currentTimeMillis() - startTime
+
+        return when(result) {
+            is ResultState.Error -> ResultState.Error(result.error)
+            is ResultState.Success -> ResultState.Success(
+                SegmentationResult(
+                    labeledData = result.data,
+                    totalTimeMs = totalTime,
+                )
             )
-
-            // Вызвать коллбэк для обновления истории в UI
-            withContext(Dispatchers.Main) {
-                onHistoryUpdate(listOf(historyItem))
-            }
         }
-
-        return result
     }
 }

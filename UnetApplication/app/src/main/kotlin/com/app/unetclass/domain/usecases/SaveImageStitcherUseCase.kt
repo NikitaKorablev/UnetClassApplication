@@ -1,5 +1,6 @@
 package com.app.unetclass.domain.usecases
 
+import android.graphics.Bitmap
 import com.app.datastore.domain.repository.ImageRepository
 import com.app.model.ClassNames
 import com.app.unet.data.ImageStitcherResult
@@ -15,37 +16,33 @@ class SaveImageStitcherUseCase @Inject constructor(
      * @param context Контекст приложения для доступа к файловой системе
      * @return `true`, если сохранение прошло успешно, иначе `false`
      */
-    operator fun invoke(result: ImageStitcherResult): String? {
-        try {
-            // Создаем уникальную папку для сохранения результатов
-            val resultsDir = imageRepository.createResultsDirectory()
+    operator fun invoke(unitedMask: Bitmap, classMasks: List<Bitmap>): String {
+        // Создаем уникальную папку для сохранения результатов
+        val resultsDir = imageRepository.createResultsDirectory()
 
-            // Сохраняем путь для последующего использования
-            val lastSavedPath = resultsDir.absolutePath
+        // Сохраняем путь для последующего использования
+        val lastSavedPath = resultsDir.absolutePath
 
-            // Сохраняем финальную маску
-            val unitedMaskSaved = imageRepository.saveImage(
-                result.unitedMask,
+        // Сохраняем финальную маску
+        val unitedMaskSaved = imageRepository.saveImage(
+            unitedMask,
+            resultsDir,
+            "united_mask.png"
+        )
+
+        // Сохраняем маски для каждого класса с именами классов
+        var allClassMasksSaved = true
+        for (i in classMasks.indices) {
+            val classMaskSaved = imageRepository.saveImage(
+                classMasks[i],
                 resultsDir,
-                "united_mask.png"
+                "${ClassNames.NAMES[i]}_prediction.png"
             )
-
-            // Сохраняем маски для каждого класса с именами классов
-            var allClassMasksSaved = true
-            for (i in result.classMasks.indices) {
-                val classMaskSaved = imageRepository.saveImage(
-                    result.classMasks[i],
-                    resultsDir,
-                    "${ClassNames.NAMES[i]}_prediction.png"
-                )
-                allClassMasksSaved = allClassMasksSaved && classMaskSaved
-            }
-
-            return if (unitedMaskSaved && allClassMasksSaved) lastSavedPath
-            else null
-        } catch (e: Exception) {
-            e.printStackTrace()
-            return null
+            allClassMasksSaved = allClassMasksSaved && classMaskSaved
         }
+
+        if (unitedMaskSaved && allClassMasksSaved) return lastSavedPath
+
+        throw Exception("Не удалось сохранить маски")
     }
 }
