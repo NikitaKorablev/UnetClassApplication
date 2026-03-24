@@ -8,7 +8,17 @@ enum class PredictedClasses(val className: String) {
     BOUNDARIES("boundaries"),
     MITOCHONDRIAL_BOUNDARIES("mitochondrial_boundaries");
 
-    fun name(): String = className
+    fun label(): String = className
+
+    operator fun get(index: Int): PredictedClasses = when (index) {
+        0 -> MITOCHONDRIA
+        1 -> PSD
+        2 -> VESICLES
+        3 -> AXON
+        4 -> BOUNDARIES
+        5 -> MITOCHONDRIAL_BOUNDARIES
+        else -> throw IndexOutOfBoundsException("Невалидный индекс: $index")
+    }
 }
 
 object ClassNames {

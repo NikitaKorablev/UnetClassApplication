@@ -18,12 +18,12 @@ data class TransparencyState(
         else -> throw IndexOutOfBoundsException("Невалидный индекс: $index")
     }
 
-    operator fun get(type: TransparencyType): Float = when (type) {
-        TransparencyType.MITOCHONDRIA -> mitochondria
-        TransparencyType.PSD -> psd
-        TransparencyType.VESICLES -> vesicles
-        TransparencyType.AXON -> axon
-        TransparencyType.BOUNDARIES -> boundaries
-        TransparencyType.MITO_BOUNDARIES -> mitochondrialBoundaries
+    operator fun get(type: PredictedClasses): Float = when (type) {
+        PredictedClasses.MITOCHONDRIA -> mitochondria
+        PredictedClasses.PSD -> psd
+        PredictedClasses.VESICLES -> vesicles
+        PredictedClasses.AXON -> axon
+        PredictedClasses.BOUNDARIES -> boundaries
+        PredictedClasses.MITOCHONDRIAL_BOUNDARIES -> mitochondrialBoundaries
     }
 }
