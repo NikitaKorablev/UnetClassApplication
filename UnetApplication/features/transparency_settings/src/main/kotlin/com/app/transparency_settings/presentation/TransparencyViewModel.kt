@@ -5,9 +5,9 @@ import android.graphics.BitmapFactory
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.app.datastore.domain.repository.ImageRepository
-import com.app.model.TransparencyType
+import com.app.model.PredictedClasses
 import com.app.transparency_settings.domain.repository.TransparencyImageProcRepository
-import com.app.transparency_settings.presentation.model.TransparencyState
+import com.app.model.TransparencyState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -28,40 +28,30 @@ class TransparencyViewModel @Inject constructor(
     val imageRepository: ImageRepository
 ) : ViewModel() {
     private lateinit var outputPath: String
-    private lateinit var classMasks: Map<TransparencyType, Bitmap>
+    private lateinit var classMasks: Map<PredictedClasses, Bitmap>
 
-    private val _state = MutableStateFlow(TransparencyState())
-    val state: StateFlow<TransparencyState> = _state.asStateFlow()
+    private val _transparencyState = MutableStateFlow(TransparencyState())
+    val transparencyState: StateFlow<TransparencyState> = _transparencyState.asStateFlow()
 
     init {
-        _state
+        _transparencyState
             .debounce(200)
             .onEach {  }
             .launchIn(viewModelScope)
     }
 
-    suspend fun setupData(
+    fun setupData(
         bitmapPaths: ArrayList<String>?,
         bitmapArray: ArrayList<Bitmap>?,
         resultPath: String,
     ) {
-        val typeKeys = listOf(
-            TransparencyType.MITOCHONDRIA,
-            TransparencyType.PSD,
-            TransparencyType.VESICLES,
-            TransparencyType.AXON,
-            TransparencyType.BOUNDARIES,
-            TransparencyType.MITO_BOUNDARIES
-        )
-
-
         if (bitmapPaths != null) {
             // Загружаем изображения из файлов
             classMasks = bitmapPaths.mapIndexed { index, path ->
                 val file = File(path)
                 require(file.exists()) { "Файл изображения не найден: $path" }
                 val bitmap = BitmapFactory.decodeFile(file.absolutePath)
-                typeKeys[index] to bitmap
+                PredictedClasses.entries[index] to bitmap
             }.toMap()
 
             outputPath = resultPath
@@ -70,30 +60,31 @@ class TransparencyViewModel @Inject constructor(
             require(bitmapArray != null) { "Необходимо передать маски классов" }
 
             classMasks = bitmapArray.mapIndexed { index, bitmap ->
-                typeKeys[index] to bitmap
+                PredictedClasses.entries[index] to bitmap
             }.toMap()
 
             outputPath = resultPath
         }
     }
 
-    fun updateTransparency(type: TransparencyType, value: Int) {
+    fun updateTransparency(type: PredictedClasses, value: Int) {
         val floatValue = value / 100f
-        _state.update { current ->
+        _transparencyState.update { current ->
             when (type) {
-                TransparencyType.MITOCHONDRIA -> current.copy(mitochondria = floatValue)
-                TransparencyType.PSD -> current.copy(psd = floatValue)
-                TransparencyType.MITO_BOUNDARIES -> current.copy(mitochondrialBoundaries = floatValue)
-                TransparencyType.VESICLES -> current.copy(vesicles = floatValue)
-                TransparencyType.AXON -> current.copy(axon = floatValue)
-                TransparencyType.BOUNDARIES -> current.copy(boundaries = floatValue)
+                PredictedClasses.MITOCHONDRIA -> current.copy(mitochondria = floatValue)
+                PredictedClasses.PSD -> current.copy(psd = floatValue)
+                PredictedClasses.MITOCHONDRIAL_BOUNDARIES ->
+                    current.copy(mitochondrialBoundaries = floatValue)
+                PredictedClasses.VESICLES -> current.copy(vesicles = floatValue)
+                PredictedClasses.AXON -> current.copy(axon = floatValue)
+                PredictedClasses.BOUNDARIES -> current.copy(boundaries = floatValue)
             }
         }
     }
 
     fun getPreviewImage(): Bitmap {
         return imageProcessor.overlayMasksWithTransparency(
-            classMasks, state.value
+            classMasks, transparencyState.value
         )
     }
 

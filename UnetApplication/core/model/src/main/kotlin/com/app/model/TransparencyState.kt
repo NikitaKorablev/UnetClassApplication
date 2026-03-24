@@ -5,7 +5,7 @@ data class TransparencyState(
     val psd: Float = 0.7f,
     val vesicles: Float = 0.6f,
     val axon: Float = 0.8f,
-    val boundaries: Float = 1.0f,
+    val boundaries: Float = 0.75f,
     val mitochondrialBoundaries: Float = 0.45f
 ) {
     operator fun get(index: Int): Float = when (index) {

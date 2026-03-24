@@ -6,11 +6,11 @@ import android.widget.SeekBar
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
-import com.app.model.TransparencyType
+import com.app.model.PredictedClasses
+import com.app.model.TransparencyState
 import com.app.transparency_settings.databinding.ActivityTransparencySettingsBinding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -31,19 +31,26 @@ class TransparencySettingsActivity : AppCompatActivity() {
     }
 
     private fun setupSeekBars() {
+        val baseState = viewModel.transparencyState.value
+        binding.mitochondriaSeekBar.progress = (baseState.mitochondria * 100).toInt()
+        binding.psdSeekBar.progress = (baseState.psd * 100).toInt()
+        binding.vesiclesSeekBar.progress = (baseState.vesicles * 100).toInt()
+        binding.axonSeekBar.progress = (baseState.axon * 100).toInt()
+        binding.boundariesSeekBar.progress = (baseState.boundaries * 100).toInt()
+        binding.mitochondrialBoundariesSeekBar.progress = (baseState.mitochondrialBoundaries * 100).toInt()
+
         val seekBarMap = mapOf(
-            binding.mitochondriaSeekBar to TransparencyType.MITOCHONDRIA,
-            binding.psdSeekBar to TransparencyType.PSD,
-            binding.vesiclesSeekBar to TransparencyType.VESICLES,
-            binding.axonSeekBar to TransparencyType.AXON,
-            binding.boundariesSeekBar to TransparencyType.BOUNDARIES,
-            binding.mitochondrialBoundariesSeekBar to TransparencyType.MITO_BOUNDARIES,
+            binding.mitochondriaSeekBar to PredictedClasses.MITOCHONDRIA,
+            binding.psdSeekBar to PredictedClasses.PSD,
+            binding.vesiclesSeekBar to PredictedClasses.VESICLES,
+            binding.axonSeekBar to PredictedClasses.AXON,
+            binding.boundariesSeekBar to PredictedClasses.BOUNDARIES,
+            binding.mitochondrialBoundariesSeekBar to PredictedClasses.MITOCHONDRIAL_BOUNDARIES,
         )
 
         seekBarMap.forEach { (seekBar, type) ->
             seekBar.onProgressChanged { value ->
                 viewModel.updateTransparency(type, value)
-//                updatePreviewImage()
             }
         }
     }
@@ -70,7 +77,7 @@ class TransparencySettingsActivity : AppCompatActivity() {
 
     private fun subscribeOnPreviewImage() {
         lifecycleScope.launch(Dispatchers.Default) {
-            viewModel.state.collect {
+            viewModel.transparencyState.collect {
                 val preview = viewModel.getPreviewImage()
 
                 withContext(Dispatchers.Main) {

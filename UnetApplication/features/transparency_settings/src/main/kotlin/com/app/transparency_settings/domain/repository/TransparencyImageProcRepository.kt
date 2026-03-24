@@ -1,8 +1,8 @@
 package com.app.transparency_settings.domain.repository
 
 import android.graphics.Bitmap
-import com.app.model.TransparencyType
-import com.app.transparency_settings.presentation.model.TransparencyState
+import com.app.model.PredictedClasses
+import com.app.model.TransparencyState
 
 interface TransparencyImageProcRepository {
     /**
@@ -12,7 +12,7 @@ interface TransparencyImageProcRepository {
      * @return объединенное изображение с наложенными масками
      */
     fun overlayMasksWithTransparency(
-        classMasks: Map<TransparencyType, Bitmap>,
+        classMasks: Map<PredictedClasses, Bitmap>,
         state: TransparencyState
     ): Bitmap
 }

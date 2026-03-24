@@ -2,11 +2,8 @@ package com.app.unet.di
 
 import android.content.Context
 import com.app.unet.data.unetmodels.PyTorchModel
+import com.app.unet.data.unetmodels.TFLiteModel
 import com.app.unet.domain.UnetModel
-import com.app.unet.domain.usecases.SaveImageStitcherUseCase
-import com.app.unet.domain.usecases.SplitImageIntoTilesUseCase
-import com.app.unet.domain.usecases.StitchingImageUseCase
-import com.app.unet.domain.usecases.TilesToTensorsUseCase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -19,18 +16,17 @@ import javax.inject.Singleton
 class Modules {
     @Provides
     @Singleton
-    fun provideUnetModel(
+    @PytorchModel
+    fun providePyTorchModel(
         @ApplicationContext
         context: Context,
-        stitchingImageUseCase: StitchingImageUseCase,
-        splitImageIntoTilesUseCase: SplitImageIntoTilesUseCase,
-        tilesToTensorsUseCase: TilesToTensorsUseCase,
-        saveImageStitcherUseCase: SaveImageStitcherUseCase
-    ): UnetModel = PyTorchModel(
-        context,
-        stitchingImageUseCase,
-        splitImageIntoTilesUseCase,
-        tilesToTensorsUseCase,
-        saveImageStitcherUseCase
-    )
+    ): UnetModel = PyTorchModel(context)
+
+    @Provides
+    @Singleton
+    @LiteRTModel
+    fun provideLiteRTModel(
+        @ApplicationContext
+        context: Context,
+    ): UnetModel = TFLiteModel(context)
 }

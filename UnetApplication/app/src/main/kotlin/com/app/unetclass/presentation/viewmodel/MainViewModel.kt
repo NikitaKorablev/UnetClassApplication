@@ -1,6 +1,7 @@
 package com.app.unetclass.presentation.viewmodel
 
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.net.Uri
 import android.util.Log
 import androidx.core.graphics.createBitmap
@@ -10,6 +11,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.app.datastore.data.PredictionHistoryItem
 import com.app.model.ResultState
+import com.app.unet.models.SegmentationResult
 import com.app.unetclass.domain.usecases.SaveImageStitcherUseCase
 import com.app.unetclass.domain.usecases.SegmentationUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -17,6 +19,10 @@ import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.File
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import javax.inject.Inject
 
 @HiltViewModel
@@ -75,12 +81,12 @@ class MainViewModel @Inject constructor(
             Dispatchers.Default + CoroutineExceptionHandler { _, throwable ->
                 throwable.printStackTrace()
                 Log.e(TAG, "Segmentation error")
-                segmentationIsStarted = false
                 _errorMessage.postValue(throwable.message)
+                segmentationIsStarted = false
                 buttonsStateManager.enableButtons()
             }
         ) {
-            Log.d(TAG, "Segmentation started")
+            Log.i(TAG, "Segmentation started")
             val result = startSegmentation(inputBitmap) { historyItems ->
                 // Обновляем список истории
                 val currentItems = _historyItems.value ?: emptyList()
@@ -89,18 +95,23 @@ class MainViewModel @Inject constructor(
 
             when(result) {
                 is ResultState.Success -> {
+                    Log.i(TAG, "Segmentation success")
+
                     val unitedMask = result.data.labeledData.unitedMask()
                     val outputPath = saveImageStitcher(
                         unitedMask,
                         result.data.labeledData.labels.map { it.getMask().bitmap }
                     )
+                    newHistoryItem(outputPath, result.data)
 
-                    Log.d(TAG, "Segmentation success")
                     withContext(Dispatchers.Main) {
                         _lastSavedPath = outputPath
                         _segmentationResult.value = unitedMask
                         _bitmap.value = unitedMask
                         _errorMessage.value = null
+
+                        segmentationIsStarted = false
+                        buttonsStateManager.enableButtons()
                     }
                 }
                 is ResultState.Error -> throw Exception(result.error)
@@ -140,14 +151,31 @@ class MainViewModel @Inject constructor(
         }
     }
 
+    private suspend fun newHistoryItem(outputPath: String, data: SegmentationResult)
+    = withContext(Dispatchers.Main) {
+        val historyItem = PredictionHistoryItem(
+            timestamp = SimpleDateFormat(
+                "yyyyMMdd_HHmmss",
+                Locale.getDefault()
+            ).format(Date()),
+            executionTime = data.totalTimeMs,
+            outputPath = outputPath,
+            imageWidth = data.labeledData.width,
+            imageHeight = data.labeledData.height
+        )
+
+        val currentItems = _historyItems.value ?: emptyList()
+        _historyItems.value = listOf(historyItem) + currentItems
+    }
+
     /**
      * Вспомогательная функция для загрузки bitmap из пути
      */
     private fun loadBitmapFromPath(imagePath: String): Bitmap? {
         return try {
-            val file = java.io.File(imagePath)
+            val file = File(imagePath)
             if (file.exists()) {
-                android.graphics.BitmapFactory.decodeFile(file.absolutePath)
+                BitmapFactory.decodeFile(file.absolutePath)
             } else null
         } catch (e: Exception) {
             e.printStackTrace()

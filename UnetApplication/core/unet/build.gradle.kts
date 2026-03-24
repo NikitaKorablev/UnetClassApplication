@@ -55,11 +55,11 @@ dependencies {
 
     // Основное ядро LiteRT
     implementation(libs.litert)
-    implementation(libs.litert.gpu)
+//    implementation(libs.litert.gpu)
     implementation(libs.litert.gpu.api)
-    implementation(libs.litert.support)
-    implementation("com.google.android.gms:play-services-tflite-java:16.4.0")
-    implementation("com.google.android.gms:play-services-tflite-gpu:16.4.0")
+//    implementation(libs.litert.support)
+//    implementation(libs.play.services.tflite.java)
+//    implementation(libs.play.services.tflite.gpu)
 
     // Glide для загрузки и кэширования изображений
     implementation(libs.glide)

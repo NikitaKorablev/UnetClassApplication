@@ -3,9 +3,11 @@ package com.app.unet.data.unetmodels
 import android.content.Context
 import android.content.res.AssetManager
 import android.graphics.Bitmap
+import com.app.model.ImageData
 import com.app.model.ResultState
 import com.app.unet.domain.UnetModel
-import com.app.unet.domain.models.SegmentationResult
+import com.app.unet.models.LabeledData
+import com.app.unet.models.SegmentationResult
 import com.google.ai.edge.litert.Accelerator
 import com.google.ai.edge.litert.CompiledModel
 import java.io.FileInputStream
@@ -16,15 +18,6 @@ import javax.inject.Inject
 class TFLiteModel @Inject constructor(
     val context: Context
 ): UnetModel {
-//    private val interpreter: Interpreter by lazy {
-//        val assetManager = context.assets
-//        val model = loadModelFile(assetManager, MODEL_PATH)
-//        Interpreter(
-//            model,
-//            Interpreter.Options()
-//        )
-//    }
-
     private val model = CompiledModel.create(
         context.assets,
         MODEL_PATH,
@@ -33,13 +26,17 @@ class TFLiteModel @Inject constructor(
     private val inputBuffers = model.createInputBuffers()
     private val outputBuffers = model.createOutputBuffers()
 
-    override fun startSegmentation(bitmap: Bitmap): ResultState<SegmentationResult, String> {
-        inputBuffers.
+    override fun predict(inputImageData: ImageData)
+    : ResultState<LabeledData, String> {
+//        inputBuffers.
+        TODO()
 
-        TODO("Not yet implemented")
     }
 
-    private fun loadModelFile(assetManager: AssetManager, modelPath: String): MappedByteBuffer {
+    private fun loadModelFile(
+        assetManager: AssetManager,
+        modelPath: String
+    ): MappedByteBuffer {
         val fileDescriptor = assetManager.openFd(modelPath)
         val inputStream = FileInputStream(fileDescriptor.fileDescriptor)
         val fileChannel = inputStream.channel

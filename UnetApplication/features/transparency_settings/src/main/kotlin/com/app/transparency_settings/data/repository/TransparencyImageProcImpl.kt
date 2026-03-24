@@ -2,9 +2,9 @@ package com.app.transparency_settings.data.repository
 
 import android.graphics.Bitmap
 import androidx.core.graphics.createBitmap
-import com.app.model.TransparencyType
+import com.app.model.PredictedClasses
 import com.app.transparency_settings.domain.repository.TransparencyImageProcRepository
-import com.app.transparency_settings.presentation.model.TransparencyState
+import com.app.model.TransparencyState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
@@ -12,7 +12,7 @@ import kotlinx.coroutines.runBlocking
 
 class TransparencyImageProcImpl : TransparencyImageProcRepository {
     override fun overlayMasksWithTransparency(
-        classMasks: Map<TransparencyType, Bitmap>,
+        classMasks: Map<PredictedClasses, Bitmap>,
         state: TransparencyState
     ): Bitmap = runBlocking(Dispatchers.Default) {
         require(classMasks.isNotEmpty()) {
