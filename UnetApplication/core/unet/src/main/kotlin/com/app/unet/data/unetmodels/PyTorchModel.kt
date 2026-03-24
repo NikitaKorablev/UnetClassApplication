@@ -1,30 +1,30 @@
 package com.app.unet.data.unetmodels
 
 import android.content.Context
-import android.graphics.Bitmap
 import android.util.Log
+import com.app.model.ImageData
 import com.app.model.ResultState
 import com.app.model.Tile
+import com.app.unet.data.LabelFactory
 import com.app.unet.data.Utils
 import com.app.unet.domain.UnetModel
-import com.app.unet.domain.models.SegmentationResult
-import com.app.unet.domain.usecases.SaveImageStitcherUseCase
-import com.app.unet.domain.usecases.SplitImageIntoTilesUseCase
-import com.app.unet.domain.usecases.StitchingImageUseCase
-import com.app.unet.domain.usecases.TilesToTensorsUseCase
+import com.app.unet.models.LabeledData
+import com.app.unet.models.classes.Axon
+import com.app.unet.models.classes.Boundaries
+import com.app.unet.models.classes.Mitochondria
+import com.app.unet.models.classes.MitochondriaBoundaries
+import com.app.unet.models.classes.PSD
+import com.app.unet.models.classes.Vesicles
 import dagger.hilt.android.qualifiers.ApplicationContext
 import org.pytorch.IValue
 import org.pytorch.Module
 import org.pytorch.Tensor
 import javax.inject.Inject
+import kotlin.math.min
 
 class PyTorchModel @Inject constructor(
     @ApplicationContext
     context: Context,
-    private val stitchingImageUseCase: StitchingImageUseCase,
-    private val splitImageIntoTilesUseCase: SplitImageIntoTilesUseCase,
-    private val tilesToTensorsUseCase: TilesToTensorsUseCase,
-    private val saveImageStitcherUseCase: SaveImageStitcherUseCase,
 ): UnetModel {
     private val module: Module
     init {
@@ -34,38 +34,21 @@ class PyTorchModel @Inject constructor(
         Log.d(TAG, "PyTorch Mobile Model loaded successfully from $MODEL_ASSET_NAME")
     }
 
-    override fun startSegmentation(bitmap: Bitmap): ResultState<SegmentationResult, String> {
-        val startTime = System.currentTimeMillis()
-
+    override fun predict(inputImageData: ImageData): ResultState<LabeledData, String> {
         try {
             // --- 1. Нарезка и подготовка тензоров (распил) ---
-            val (tiles, tensors) = cutTensor(bitmap)
+            val inputTensors = toPyTorchTensors(inputImageData.tiles)
 
             // --- 2. Инференс (predict) ---
-            val outputTensors = predictBatch(tensors)
+            val outputTensors = predictBatch(inputTensors)
+
+            if (outputTensors.size != inputImageData.tiles.size) throw IllegalArgumentException(
+                "Количество тензоров должно совпадать с количеством фрагментов."
+            )
 
             // --- 3. Сборка (сборка) и Постобработка ---
-            val result = stitchingImageUseCase(
-                outputTensors,
-                tiles,
-                bitmap.width,
-                bitmap.height
-            )
-
-            // Сохранение результатов
-            val outputPath = saveImageStitcherUseCase(result)
-            outputPath ?: return ResultState.Error("Failed to save results")
-
-            val totalTime = System.currentTimeMillis() - startTime
-            return ResultState.Success(
-                SegmentationResult(
-                    bitmap = result.unitedMask,
-                    outputPath = outputPath,
-                    totalTimeMs = totalTime,
-                    imageWidth = result.unitedMask.width,
-                    imageHeight = result.unitedMask.height
-                )
-            )
+            val result = labelData(outputTensors, inputImageData)
+            return ResultState.Success(result)
         } catch (err: Exception) {
             return ResultState.Error(err.message.toString())
         }
@@ -85,15 +68,135 @@ class PyTorchModel @Inject constructor(
         }
     }
 
-    private fun cutTensor(bitmap: Bitmap): Pair<List<Tile>, List<Tensor>> {
-        val tiles = splitImageIntoTilesUseCase(bitmap)
-        val tensors = tilesToTensorsUseCase(tiles)
+    /**
+     * Преобразует список фрагментов (Tile) в список входных тензоров PyTorch.
+     * Включает нормализацию 0-255 -> 0.0-1.0 (аналог to_0_1_format_img).
+     * @param tiles Список фрагментов, полученный из splitImageIntoTiles.
+     * @return Список готовых к инференсу тензоров.
+     */
+    private fun toPyTorchTensors(tiles: List<Tile>): List<Tensor> {
+        val tensors = mutableListOf<Tensor>()
 
-        return Pair(tiles, tensors)
+        for (tile in tiles) {
+            // Создаем одноканальный тензор вручную
+            val bitmap = tile.bitmap
+            val width = bitmap.width
+            val height = bitmap.height
+
+            // Убедимся, что изображение действительно в градациях серого
+            // Значения пикселей будут нормализованы от 0 до 1
+            val floatArray = FloatArray(1 * 1 * height * width)
+
+            val pixels = IntArray(width * height)
+            bitmap.getPixels(pixels, 0, width, 0, 0, width, height)
+
+            for ((i, pixel) in pixels.withIndex()) {
+                // Берем значение одного из каналов (так как в градациях серого R=G=B)
+                val grayValue =
+                    (pixel shr 16) and 0xFF // Берем R канал, но в градации серого все каналы одинаковы
+                floatArray[i] = grayValue / 255.0f // Нормализация к [0, 1]
+            }
+
+            // Создаем тензор с правильной формой [1, 1, height, width]
+            val inputTensor = Tensor.fromBlob(
+                floatArray,
+                longArrayOf(1, 1, height.toLong(), width.toLong())
+            )
+            tensors.add(inputTensor)
+        }
+        return tensors
+    }
+
+    /**
+     * Собирает предсказанные маски в одно полноразмерное изображение и маски для каждого класса.
+     * Аналог glit_image.
+     *
+     * @param tensors Список выходных тензоров (результатов инференса).
+     * @param inputImageData Список объектов Tile, содержащих координаты нарезки.
+     * @return Результат соединения: финальная маска и маски для каждого класса.
+     */
+    private fun labelData(
+        tensors: List<Tensor>,
+        inputImageData: ImageData
+    ): LabeledData {
+        // Инициализация полноразмерного выходного массива (float32)
+        // Размер: [H, W, numClasses]
+        val finalMaskArray = Array(NUM_CLASSES) {
+            Array(inputImageData.height) {
+                FloatArray(inputImageData.width)
+            }
+        }
+
+        // Обход всех фрагментов и их результатов
+        for (i in tensors.indices) {
+            val tileInfo = inputImageData.tiles[i]
+            stitchTile(tensors[i], tileInfo, finalMaskArray)
+        }
+
+        return LabeledData(
+            mitochondria = LabelFactory.getLabel(Mitochondria().type.className, finalMaskArray[0]) as Mitochondria,
+            PSD = LabelFactory.getLabel(PSD().type.className, finalMaskArray[1]) as PSD,
+            vesicles = LabelFactory.getLabel(Vesicles().type.className, finalMaskArray[2]) as Vesicles,
+            axon = LabelFactory.getLabel(Axon().type.className, finalMaskArray[3]) as Axon,
+            boundaries = LabelFactory.getLabel(Boundaries().type.className, finalMaskArray[4]) as Boundaries,
+            mitochondriaBoundaries = LabelFactory.getLabel(MitochondriaBoundaries().type.className, finalMaskArray[5]) as MitochondriaBoundaries,
+        )
+
+        // --- 2. Постобработка (Аналог to_0_255_format_img) ---
+//        val unitedMask = createUnitedMask(finalMaskArray, originalWidth, originalHeight)
+//        return createClassMasks(finalMaskArray, inputImageData.width, inputImageData.height)
+    }
+
+    private fun stitchTile(
+        tensor: Tensor,
+        tileInfo: Tile, // или как называется объект в inputImageData.tiles
+        finalMaskArray: Array<Array<FloatArray>>
+    ) {
+        val tileSize = tensor.shape()[2].toInt() // H или W (256)
+        val outputData = tensor.dataAsFloatArray
+
+        // Выходной тензор имеет форму [1, numClasses, TILE_SIZE, TILE_SIZE].
+        // Индексация: [c * size*size + y*size + x]
+
+        // Внешние границы в выходном изображении
+        val outStartX = tileInfo.startX
+        val outStartY = tileInfo.startY
+        val outEndX = tileInfo.endX
+        val outEndY = tileInfo.endY
+
+        // Внутренние границы для уникальной области (получаем [64:192])
+        val uniqueStart = HALF_OVERLAP
+        val uniqueEnd = tileSize - HALF_OVERLAP // 256 - 32 = 224
+
+        // --- 1. Центральная область (Inner area) ---
+        // Используется для всех, кроме краевых и угловых фрагментов в Python-коде,
+        // но мы используем эту логику, чтобы заполнить любую неперекрывающуюся часть
+        // и берем полный фрагмент для углов/краев по необходимости.
+
+        // Внутренние индексы X и Y для текущего фрагмента
+        val tileYRange = uniqueStart until min(tileSize, outEndY - outStartY) - HALF_OVERLAP
+        val tileXRange = uniqueStart until min(tileSize, outEndX - outStartX) - HALF_OVERLAP
+
+        // Цикл по уникальной области предсказания (например, [32:224])
+        for (imgType in 0 until NUM_CLASSES) {
+            for (ty in tileYRange) {
+                val outY = outStartY + ty
+                for (tx in tileXRange) {
+                    val outX = outStartX + tx
+
+                    // Индекс в плоском массиве outputData: [channel * size*size + y*size + x]
+                    val index = imgType * tileSize * tileSize + ty * tileSize + tx
+                    finalMaskArray[imgType][outY][outX] = outputData[index]
+                }
+            }
+        }
     }
 
     companion object {
         const val TAG = "PyTorchModel"
         const val MODEL_ASSET_NAME = "traced_model.pt"
+        const val OVERLAP: Int = 128 // Размер перекрытия (e.g., 64)
+        const val NUM_CLASSES: Int = 6 // Количество каналов (классов) в выходном тензоре (e.g., 6)
+        const val HALF_OVERLAP = OVERLAP / 2 // Половина перекрытия (e.g., 32)
     }
 }
