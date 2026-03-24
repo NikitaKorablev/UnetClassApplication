@@ -1,14 +1,12 @@
-package com.app.transparency_settings.presentation.model
-
-import com.app.model.TransparencyType
+package com.app.model
 
 data class TransparencyState(
-    val mitochondria: Float = 1.0f,
-    val psd: Float = 1.0f,
-    val vesicles: Float = 1.0f,
-    val axon: Float = 1.0f,
+    val mitochondria: Float = 0.3f,
+    val psd: Float = 0.7f,
+    val vesicles: Float = 0.6f,
+    val axon: Float = 0.8f,
     val boundaries: Float = 1.0f,
-    val mitochondrialBoundaries: Float = 1.0f
+    val mitochondrialBoundaries: Float = 0.45f
 ) {
     operator fun get(index: Int): Float = when (index) {
         0 -> mitochondria

@@ -1,8 +1,8 @@
-package com.app.unet.domain.usecases
+package com.app.unetclass.domain.usecases
 
 import com.app.datastore.domain.repository.ImageRepository
+import com.app.model.ClassNames
 import com.app.unet.data.ImageStitcherResult
-import com.app.unet.utils.ClassNames
 import javax.inject.Inject
 
 class SaveImageStitcherUseCase @Inject constructor(
@@ -13,7 +13,7 @@ class SaveImageStitcherUseCase @Inject constructor(
      *
      * @param result Результат сегментации
      * @param context Контекст приложения для доступа к файловой системе
-     * @return true, если сохранение прошло успешно, иначе false
+     * @return `true`, если сохранение прошло успешно, иначе `false`
      */
     operator fun invoke(result: ImageStitcherResult): String? {
         try {

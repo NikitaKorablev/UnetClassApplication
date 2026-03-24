@@ -1,4 +1,4 @@
-package com.app.unet.domain.models
+package com.app.unet.models
 
 import android.graphics.Bitmap
 
