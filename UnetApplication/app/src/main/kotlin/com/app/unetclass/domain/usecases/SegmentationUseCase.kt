@@ -4,18 +4,15 @@ import android.graphics.Bitmap
 import com.app.datastore.data.PredictionHistoryItem
 import com.app.model.ImageData
 import com.app.model.ResultState
-import com.app.unet.data.unetmodels.PyTorchModel
+import com.app.unet.di.LiteRTModel
 import com.app.unet.di.PytorchModel
 import com.app.unet.domain.UnetModel
-import com.app.unetclass.domain.usecases.SaveImageStitcherUseCase
 import com.app.unet.models.SegmentationResult
 import com.app.unet.domain.usecases.SplitImageIntoTilesUseCase
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 class SegmentationUseCase @Inject constructor(
-    @param:PytorchModel private val model: UnetModel,
+    @param:LiteRTModel private val model: UnetModel,
     private val imageToTiles: SplitImageIntoTilesUseCase,
 ) {
     operator fun invoke(

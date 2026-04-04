@@ -19,6 +19,10 @@ enum class PredictedClasses(val className: String) {
         5 -> MITOCHONDRIAL_BOUNDARIES
         else -> throw IndexOutOfBoundsException("Невалидный индекс: $index")
     }
+
+    companion object {
+        const val NUM_CLASSES: Int = 6
+    }
 }
 
 object ClassNames {

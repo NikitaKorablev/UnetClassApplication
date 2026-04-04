@@ -56,8 +56,11 @@ dependencies {
     // Основное ядро LiteRT
     implementation(libs.litert)
 //    implementation(libs.litert.gpu)
+//    implementation(libs.litert.support.api)
+    implementation(libs.litert.support.api) {
+        exclude(group = "com.google.ai.edge.litert", module = "litert-api")
+    }
     implementation(libs.litert.gpu.api)
-//    implementation(libs.litert.support)
 //    implementation(libs.play.services.tflite.java)
 //    implementation(libs.play.services.tflite.gpu)
 

@@ -3,6 +3,7 @@ package com.app.unet.data.unetmodels
 import android.content.Context
 import android.util.Log
 import com.app.model.ImageData
+import com.app.model.PredictedClasses
 import com.app.model.ResultState
 import com.app.model.Tile
 import com.app.unet.data.LabelFactory
@@ -50,6 +51,7 @@ class PyTorchModel @Inject constructor(
             val result = labelData(outputTensors, inputImageData)
             return ResultState.Success(result)
         } catch (err: Exception) {
+            err.printStackTrace()
             return ResultState.Error(err.message.toString())
         }
     }
@@ -121,7 +123,7 @@ class PyTorchModel @Inject constructor(
     ): LabeledData {
         // Инициализация полноразмерного выходного массива (float32)
         // Размер: [H, W, numClasses]
-        val finalMaskArray = Array(NUM_CLASSES) {
+        val finalMaskArray = Array(PredictedClasses.NUM_CLASSES) {
             Array(inputImageData.height) {
                 FloatArray(inputImageData.width)
             }
@@ -130,7 +132,7 @@ class PyTorchModel @Inject constructor(
         // Обход всех фрагментов и их результатов
         for (i in tensors.indices) {
             val tileInfo = inputImageData.tiles[i]
-            stitchTile(tensors[i], tileInfo, finalMaskArray)
+            stitchTile(tensors[i].dataAsFloatArray, tileInfo, finalMaskArray)
         }
 
         return LabeledData(
@@ -147,56 +149,39 @@ class PyTorchModel @Inject constructor(
 //        return createClassMasks(finalMaskArray, inputImageData.width, inputImageData.height)
     }
 
-    private fun stitchTile(
-        tensor: Tensor,
-        tileInfo: Tile, // или как называется объект в inputImageData.tiles
-        finalMaskArray: Array<Array<FloatArray>>
-    ) {
-        val tileSize = tensor.shape()[2].toInt() // H или W (256)
-        val outputData = tensor.dataAsFloatArray
-
-        // Выходной тензор имеет форму [1, numClasses, TILE_SIZE, TILE_SIZE].
-        // Индексация: [c * size*size + y*size + x]
-
-        // Внешние границы в выходном изображении
-        val outStartX = tileInfo.startX
-        val outStartY = tileInfo.startY
-        val outEndX = tileInfo.endX
-        val outEndY = tileInfo.endY
-
-        // Внутренние границы для уникальной области (получаем [64:192])
-        val uniqueStart = HALF_OVERLAP
-        val uniqueEnd = tileSize - HALF_OVERLAP // 256 - 32 = 224
-
-        // --- 1. Центральная область (Inner area) ---
-        // Используется для всех, кроме краевых и угловых фрагментов в Python-коде,
-        // но мы используем эту логику, чтобы заполнить любую неперекрывающуюся часть
-        // и берем полный фрагмент для углов/краев по необходимости.
-
-        // Внутренние индексы X и Y для текущего фрагмента
-        val tileYRange = uniqueStart until min(tileSize, outEndY - outStartY) - HALF_OVERLAP
-        val tileXRange = uniqueStart until min(tileSize, outEndX - outStartX) - HALF_OVERLAP
-
-        // Цикл по уникальной области предсказания (например, [32:224])
-        for (imgType in 0 until NUM_CLASSES) {
-            for (ty in tileYRange) {
-                val outY = outStartY + ty
-                for (tx in tileXRange) {
-                    val outX = outStartX + tx
-
-                    // Индекс в плоском массиве outputData: [channel * size*size + y*size + x]
-                    val index = imgType * tileSize * tileSize + ty * tileSize + tx
-                    finalMaskArray[imgType][outY][outX] = outputData[index]
-                }
-            }
-        }
-    }
+//    private fun stitchTile(
+//        outputData: FloatArray,
+//        tileInfo: Tile, // или как называется объект в inputImageData.tiles
+//        finalMaskArray: Array<Array<FloatArray>>
+//    ) {
+//        val tileSize = Tile.SIZE // H или W (256)
+//
+//        val outStartX = tileInfo.startX
+//        val outStartY = tileInfo.startY
+//        val outEndX = tileInfo.endX
+//        val outEndY = tileInfo.endY
+//
+//        // Внутренние границы для уникальной области (получаем [64:192])
+//        val uniqueStart = Tile.SHIFT
+//
+//        val tileYRange = uniqueStart until min(tileSize, outEndY - outStartY) - Tile.SHIFT
+//        val tileXRange = uniqueStart until min(tileSize, outEndX - outStartX) - Tile.SHIFT
+//
+//        for (imgType in 0 until PredictedClasses.NUM_CLASSES) {
+//            for (ty in tileYRange) {
+//                val outY = outStartY + ty
+//                for (tx in tileXRange) {
+//                    val outX = outStartX + tx
+//
+//                    val index = imgType * tileSize * tileSize + ty * tileSize + tx
+//                    finalMaskArray[imgType][outY][outX] = outputData[index]
+//                }
+//            }
+//        }
+//    }
 
     companion object {
         const val TAG = "PyTorchModel"
         const val MODEL_ASSET_NAME = "traced_model.pt"
-        const val OVERLAP: Int = 128 // Размер перекрытия (e.g., 64)
-        const val NUM_CLASSES: Int = 6 // Количество каналов (классов) в выходном тензоре (e.g., 6)
-        const val HALF_OVERLAP = OVERLAP / 2 // Половина перекрытия (e.g., 32)
     }
 }

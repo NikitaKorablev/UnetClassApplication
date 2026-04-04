@@ -58,21 +58,13 @@ data class LabeledData(
     fun unitedMask(alphas: TransparencyState = TransparencyState()): Bitmap {
         val resultBitmap = createBitmap(width, height)
         val canvas = Canvas(resultBitmap)
-        // Очищаем холст (черный цвет, так как мы ищем "самый светлый" пиксель)
         canvas.drawColor(Color.BLACK)
 
         labels.forEach{ label ->
             val alphaFloat = alphas[label.type]
             val paint = Paint().apply {
-                // Устанавливаем прозрачность слоя
                 alpha = (alphaFloat * 255).toInt().coerceIn(0, 255)
-
-                // Устанавливаем режим наложения "Lighten"
-                // Он сравнивает текущий пиксель (с учетом alpha) и пиксель на Canvas
-                // и оставляет тот, что ярче
                 xfermode = PorterDuffXfermode(PorterDuff.Mode.LIGHTEN)
-
-                // Опционально: для четких границ бинарного изображения
                 isAntiAlias = false
             }
 

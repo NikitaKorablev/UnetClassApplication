@@ -70,11 +70,8 @@ class SplitImageIntoTilesUseCase {
         return tiles
     }
 
-
     companion object {
         const val TILE_SIZE = 256
-        const val OVERLAP = 128
-
-        const val STEP = TILE_SIZE - OVERLAP
+        const val STEP = TILE_SIZE - Tile.SHIFT*2
     }
 }

@@ -1,55 +1,89 @@
-# Project Summary
+The user wants me to create a comprehensive project summary based on our conversation history about fixing the TFLiteModel issue. Let me extract the key information:
+
+1. Overall Goal: Fix the TFLiteModel segmentation issue where all output classes showed identical data
+
+2. Key Knowledge:
+- TFLite uses NHWC format while PyTorch uses NCHW
+- CompiledModel API's readFloat() method behavior
+- Tile-based processing with overlap for large images
+- 6-class semantic segmentation for biomedical images
+
+3. Recent Actions:
+- Identified the output tensor format issue (NCHW vs NHWC)
+- Discovered the readFloat() API issue
+- Created detailed research report
+
+4. Current Plan:
+- Apply the fix to TFLiteModel.kt
+- Test the changes
+- Verify results match PyTorchModel
+
+Let me write this in the requested format.# Project Summary
 
 ## Overall Goal
-To develop and enhance an Android application (UnetClassApplication) for U-Net image segmentation with improved state management using ViewModel, detailed result viewing, transparency settings, and robust state preservation across configuration changes.
+Исправить критическую ошибку в `TFLiteModel.kt`, вызывающую некорректную работу сегментации изображений (все 6 классов показывают идентичные данные) из-за неправильного чтения выходного буфера модели и неверного формата тензора.
 
 ## Key Knowledge
-- The project is a multi-framework machine learning application for biomedical image segmentation (U-Net based)
-- Android app is built with Kotlin using Android SDK with Clean Architecture principles
-- Uses PyTorch Mobile library for ML inference, PhotoView for image scaling, Glide for image loading
-- Images are saved to Pictures/UnetClass/ with unique folders per prediction with class-specific filenames
-- History of predictions is displayed in RecyclerView with visual selection highlighting
-- All image operations must be compatible with Android 10+ Scoped Storage restrictions using MediaStore API
-- Activities are locked in portrait orientation
-- Bitmaps are saved with class-specific names instead of generic names for better clarity
-- Transparency settings for classes are available through sliders in a dedicated activity
-- ViewModel is now used for state management to properly handle configuration changes
-- Dependencies: `androidx.lifecycle:lifecycle-viewmodel-ktx`, `androidx.activity:activity-ktx`
-- State must be preserved during screen rotations and activity recreations without using onSaveInstanceState for complex data
+
+### Архитектурные особенности
+- **Проект**: Android-приложение для семантической сегментации биомедицинских изображений (U-Net архитектура)
+- **Две модели**: `PyTorchModel` (рабочая) и `TFLiteModel` (проблемная, конвертированная из PyTorch)
+- **6 классов сегментации**: митохондрии, PSD, везикулы, аксон, границы, границы митохондрий
+
+### Критические технические детали
+- **PyTorch формат**: NCHW `[batch, channels, height, width]` → `[1, 6, 256, 256]`
+- **TFLite формат**: NHWC `[batch, height, width, channels]` → `[1, 256, 256, 6]`
+- **CompiledModel API**: `outputBuffers[0].readFloat()` возвращает одно значение, а не массив
+- **Правильное чтение буфера**: создать `FloatArray` и передать в `readFloat(array)`
+- **Формула индексации NHWC**: `(y * width + x) * channels + channel`
+- **Размер тайла**: 256×256 пикселей с перекрытием 64 пикселя (OVERLAP)
+
+### Файлы проекта
+- `core/unet/src/main/kotlin/com/app/unet/data/unetmodels/TFLiteModel.kt` — проблемный файл
+- `core/unet/src/main/kotlin/com/app/unet/data/unetmodels/PyTorchModel.kt` — эталонная реализация
+- `TFLITE_MODEL_RESEARCH.md` — отчёт об исследовании проблемы
 
 ## Recent Actions
-- Implemented detailed result viewing functionality with separate DetailActivity
-- Added transparency settings for different segmentation classes using sliders
-- Fixed transparency rendering implementation to properly handle alpha values
-- Fixed MainActivity state restoration issue where selected history item was lost on rotation
-- Extended state preservation to save any bitmap and the full history list using temporary files
-- Created comprehensive ViewModel architecture (MainViewModel, MainViewModelFactory)
-- Migrated MainActivity to use ViewModel for managing:
-  - Current bitmap and selected image URI
-  - History items list and selected history item
-  - Button states (enabled/disabled)
-  - Processing state and error messages
-  - Segmentation results
-- Removed old onSaveInstanceState and manual restoration code
-- Added proper SingleLiveEvent-like pattern considerations for one-time events like Toast messages
-- Updated dependencies in build.gradle for ViewModel support
-- Fixed issue where Toast messages were repeatedly shown after screen rotation
+
+### Исследование проблемы (1 апреля 2026)
+1. **[DONE]** Выявлена основная проблема: неправильный формат выходного тензора (NCHW вместо NHWC)
+2. **[DONE]** Обнаружена критическая ошибка API: `readFloat()` возвращает одно float-значение, а не массив
+3. **[DONE]** Проанализирована формула индексации для NHWC формата
+4. **[DONE]** Сравнены реализации `PyTorchModel` и `TFLiteModel` для выявления различий
+5. **[DONE]** Создан подробный отчёт в `TFLITE_MODEL_RESEARCH.md`
+
+### Предыдущие изменения (из PROJECT_SUMMARY.md)
+- **[DONE]** Реализована архитектура ViewModel для управления состоянием MainActivity
+- **[DONE]** Добавлено детальное просмотр результатов сегментации
+- **[DONE]** Настройки прозрачности для классов сегментации
+- **[DONE]** Исправлено сохранение состояния при изменении конфигурации
 
 ## Current Plan
-- [DONE] Add ViewModel dependencies to build.gradle
-- [DONE] Create MainViewModel and MainViewModelFactory
-- [DONE] Integrate ViewModel into MainActivity
-- [DONE] Migrate state management logic to ViewModel
-- [DONE] Remove old onSaveInstanceState implementation
-- [DONE] Implement proper LiveData observers in MainActivity
-- [DONE] Handle potential issues with repeated events (like Toast messages) on configuration changes
-- [IN PROGRESS] Refine ViewModel implementation for edge cases and error handling
-- [TODO] Add SingleLiveEvent pattern or similar for one-time UI events like Toasts and navigation
-- [TODO] Consider refactoring SegmentationPresenter integration into ViewModel for better separation of concerns
-- [TODO] Add unit tests for ViewModel logic
-- [TODO] Review and optimize memory management for Bitmap handling in the new architecture
+
+### Исправление TFLiteModel
+- [DONE] Идентификация корневой проблемы (readFloat API + NHWC формат)
+- [DONE] Разработка исправления для чтения выходного буфера
+- [TODO] Применить исправление к `TFLiteModel.kt`:
+  ```kotlin
+  val expectedOutputSize = Tile.SIZE * Tile.SIZE * PredictedClasses.NUM_CLASSES
+  val outputFloatArray = FloatArray(expectedOutputSize)
+  outputBuffers[0].readFloat(outputFloatArray)
+  ```
+- [TODO] Обновить формулу индексации на NHWC-совместимую
+- [TODO] Добавить логирование для отладки размера и значений выхода
+
+### Тестирование
+- [TODO] Собрать проект: `./gradlew assembleDebug`
+- [TODO] Протестировать на устройстве/эмуляторе
+- [TODO] Сравнить результаты с `PyTorchModel`
+- [TODO] Проверить, что каждый класс содержит уникальные данные
+
+### Дополнительные задачи
+- [TODO] Проверить корректность конвертации модели (TFLite выходной слой)
+- [TODO] Оптимизировать обработку памяти для Bitmap
+- [TODO] Рассмотреть рефакторинг `SegmentationPresenter` интеграции
 
 ---
 
 ## Summary Metadata
-**Update time**: 2025-12-09T17:11:11.233Z 
+**Update time**: 2026-04-01T20:23:39.468Z 
