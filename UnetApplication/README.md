@@ -108,6 +108,16 @@ classDef unknown fill:#FFADAD,stroke:#000,stroke-width:2px,color:#000;
 | **`:core:domain`** | Android Library | Pure Kotlin domain layer with business logic | `Router` interface |
 | **`:features:transparency_settings`** | Android Feature | UI for adjusting class visualization opacities | `TransparencySettingsActivity`, `TransparencyViewModel` |
 
+> ⚠️ **Architecture Refactoring In Progress**  
+> Currently, some modules violate strict Clean Architecture principles (e.g., `:features:transparency_settings` and `:core:unet` depend directly on `:core:datastore`). Active work is underway to eliminate these dependencies by introducing proper domain interfaces and ensuring feature modules only depend on the domain layer, not data implementations.
+>
+> 🔧 **Feature Extraction In Progress**  
+> The `:app` module still contains several features that should be extracted into dedicated feature modules:
+> - **Detail View** (`features.detail`) - Display individual class masks from prediction results
+> - **Fullscreen View** (`features.fullscreen`) - Zoomable image viewer with PhotoView
+> - **History Component** (`presentation.HistoryAdapter`) - Prediction history list UI  
+> These will be progressively moved to separate `:features:*` modules to reduce `:app` module coupling and improve modularity.
+
 ## 🚀 Supported Inference Engines
 
 | Engine | Backend | Acceleration | Status | Model File |
@@ -166,81 +176,6 @@ Key performance metrics tracked:
 - **Target SDK**: 34
 - **Compile SDK**: 36
 - **JVM Target**: 17
-
-## 📁 Project Structure (Detailed)
-
-```
-D:\Repozitories\UnetClassApplication\
-└── UnetApplication/
-    ├── app/
-    │   └── src/main/kotlin/com/app/unetclass/
-    │       ├── UnetClassApplication.kt          # Hilt @HiltAndroidApp
-    │       ├── di/DIModules.kt                  # App-level DI modules
-    │       ├── domain/usecases/                 # Application use cases
-    │       │   ├── SegmentationUseCase.kt
-    │       │   ├── SaveImageStitcherUseCase.kt
-    │       │   └── GetSavedPredictionsUseCase.kt
-    │       ├── features/
-    │       │   ├── detail/                      # Detail view
-    │       │   └── fullscreen/                  # Fullscreen view
-    │       ├── presentation/
-    │       │   ├── MainActivity.kt
-    │       │   ├── MainViewModel.kt
-    │       │   ├── HistoryAdapter.kt
-    │       │   └── viewmodel/
-    │       └── utils/                           # Navigation helpers
-    │
-    ├── core/
-    │   ├── model/
-    │   │   └── src/main/kotlin/com/app/model/
-    │   │       ├── Tile.kt                      # 256x256 tile with coords
-    │   │       ├── ImageData.kt                 # Image + tiles container
-    │   │       ├── ClassNames.kt                # 6 predicted classes enum
-    │   │       ├── TransparencyState.kt         # Alpha values per class
-    │   │       └── ResultState.kt               # Success/Error sealed class
-    │   │
-    │   ├── domain/
-    │   │   └── src/main/kotlin/com/app/domain/
-    │   │       └── utils/Router.kt              # Navigation interface
-    │   │
-    │   ├── datastore/
-    │   │   └── src/main/kotlin/com/app/datastore/
-    │   │       ├── data/
-    │   │       │   ├── PredictionHistoryItem.kt
-    │   │       │   └── repository/
-    │   │       ├── di/DIModules.kt
-    │   │       └── domain/repository/
-    │   │
-    │   └── unet/
-    │       └── src/main/kotlin/com/app/unet/
-    │           ├── domain/
-    │           │   ├── UnetModel.kt             # ML model interface
-    │           │   └── usecases/
-    │           │       └── SplitImageIntoTilesUseCase.kt
-    │           ├── data/
-    │           │   ├── unetmodels/
-    │           │   │   ├── PyTorchModel.kt      # PyTorch backend
-    │           │   │   └── TFLiteModel.kt       # TFLite backend
-    │           │   ├── LabelFactory.kt
-    │           │   └── Utils.kt
-    │           ├── models/
-    │           │   ├── LabeledData.kt
-    │           │   ├── SegmentationResult.kt
-    │           │   └── classes/                 # 6 label types
-    │           ├── di/                          # Hilt modules & qualifiers
-    │           └── utils/
-    │               └── TimeMeasurementService.kt
-    │
-    └── features/
-        └── transparency_settings/
-            └── src/main/kotlin/com/app/transparency_settings/
-                ├── presentation/
-                │   ├── TransparencySettingsActivity.kt
-                │   └── TransparencyViewModel.kt
-                ├── domain/repository/
-                ├── data/repository/
-                └── di/DIModules.kt
-```
 
 ## 🔌 Dependencies
 
