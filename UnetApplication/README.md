@@ -99,89 +99,14 @@ classDef unknown fill:#FFADAD,stroke:#000,stroke-width:2px,color:#000;
 
 ### Module Details
 
-#### `:app` - Application Module
-**Type:** Android Application  
-**Package:** `com.app.unetclass`
-
-The main Android application module containing:
-- **UI Layer**: Activities, ViewModels, Adapters
-- **Main Features**: Image selection, segmentation, history browsing
-- **Navigation**: Router implementation for cross-module navigation
-- **Dependency Injection**: Hilt application setup
-
-**Key Components:**
-- `MainActivity` - Main UI with image viewer and prediction history
-- `MainViewModel` - Manages segmentation state and history
-- `DetailActivity` - Detailed view of segmentation results
-- `FullscreenActivity` - Fullscreen image viewing mode
-- Use Cases: `SegmentationUseCase`, `SaveImageStitcherUseCase`, `GetSavedPredictionsUseCase`
-
-#### `:core:unet` - ML Inference Engine
-**Type:** Android Library  
-**Package:** `com.app.unet`
-
-The core ML module containing dual inference backends:
-
-**Inference Models:**
-- **PyTorch Mobile** (`PyTorchModel`) - Uses `traced_model.pt` with PyTorch Android runtime
-- **TensorFlow Lite** (`TFLiteModel`) - Uses `tiny_unet_v3.tflite` with GPU acceleration via LiteRT
-
-**Key Components:**
-- `UnetModel` interface - Abstract contract for ML models
-- `SplitImageIntoTilesUseCase` - Tiles large images into 256x256 chunks with 32px overlap
-- Label classes: `Mitochondria`, `PSD`, `Vesicles`, `Axon`, `Boundaries`, `MitochondriaBoundaries`
-- `LabeledData` - Aggregates predictions for all 6 classes
-- `TimeMeasurementService` - Performance profiling utilities
-
-**Tiled Inference Strategy:**
-- Images are split into 256x256 tiles with 32px overlap (shift)
-- Each tile is processed independently
-- Results are stitched back using overlap blending to avoid edge artifacts
-
-#### `:core:model` - Domain Models
-**Type:** Android Library  
-**Package:** `com.app.model`
-
-Shared data models and value objects:
-
-**Key Data Classes:**
-- `Tile` - 256x256 image tile with coordinates (SIZE=256, SHIFT=32)
-- `ImageData` - Image dimensions and list of tiles
-- `TransparencyState` - Alpha values for each class (mitochondria: 0.3, psd: 0.7, vesicles: 0.6, axon: 0.8, boundaries: 0.75, mitochondrialBoundaries: 0.45)
-- `ResultState<T, E>` - Generic sealed class for success/error outcomes
-- `PredictedClasses` enum - 6 segmentation classes with metadata
-
-#### `:core:datastore` - Data Layer
-**Type:** Android Library  
-**Package:** `com.app.datastore`
-
-Data persistence and repository implementations:
-
-**Key Components:**
-- `ImageRepository` / `ImageRepositoryImpl` - Image storage operations
-- `PredictionHistoryRepository` / `PredictionHistoryRepositoryImpl` - History management
-- `PredictionHistoryItem` - History record with timestamp, execution time, paths
-- `ImageSaver` - Image persistence utilities
-
-#### `:core:domain` - Domain Layer
-**Type:** Android Library  
-**Package:** `com.app.domain`
-
-Pure Kotlin module containing:
-- Business logic interfaces
-- `Router` interface - Navigation contract for cross-module routing
-
-#### `:features:transparency_settings` - Feature Module
-**Type:** Android Feature Library  
-**Package:** `com.app.transparency_settings`
-
-Feature-specific module for managing visualization settings:
-
-**Key Components:**
-- `TransparencySettingsActivity` - UI for adjusting class opacities
-- `TransparencyViewModel` - Manages transparency state
-- `TransparencyImageProcRepository` - Image processing with transparency
-- `TransparencySettingsRepository` - Settings persistence
+| Module | Type | Description | Key Components |
+|--------|------|-------------|----------------|
+| **`:app`** | Android Application | Main app with UI, ViewModels, navigation & Hilt setup | `MainActivity`, `MainViewModel`, Use Cases |
+| **`:core:unet`** | Android Library | Dual ML inference engine (PyTorch + TFLite) with tiled processing | `UnetModel`, `PyTorchModel`, `TFLiteModel`, `SplitImageIntoTilesUseCase` |
+| **`:core:model`** | Android Library | Shared domain models & data classes | `Tile`, `ImageData`, `PredictedClasses`, `TransparencyState`, `ResultState` |
+| **`:core:datastore`** | Android Library | Data persistence & repository implementations | `ImageRepository`, `PredictionHistoryRepository`, `ImageSaver` |
+| **`:core:domain`** | Android Library | Pure Kotlin domain layer with business logic | `Router` interface |
+| **`:features:transparency_settings`** | Android Feature | UI for adjusting class visualization opacities | `TransparencySettingsActivity`, `TransparencyViewModel` |
 
 ## 🚀 Supported Inference Engines
 
