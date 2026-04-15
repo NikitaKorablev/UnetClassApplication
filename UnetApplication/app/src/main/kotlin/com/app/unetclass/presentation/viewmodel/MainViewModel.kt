@@ -96,6 +96,8 @@ class MainViewModel @Inject constructor(
             when(result) {
                 is ResultState.Success -> {
                     Log.i(TAG, "Segmentation success")
+                    val memoryInMB = result.data.memoryUsageBytes / (1024 * 1024)
+                    Log.d(TAG, "Memory usage: ${memoryInMB}Мб")
 
                     val unitedMask = result.data.labeledData.unitedMask()
                     val outputPath = saveImageStitcher(

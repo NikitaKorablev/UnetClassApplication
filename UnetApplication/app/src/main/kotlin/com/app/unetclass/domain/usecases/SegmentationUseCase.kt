@@ -1,6 +1,7 @@
 package com.app.unetclass.domain.usecases
 
 import android.graphics.Bitmap
+import android.os.Debug
 import com.app.datastore.data.PredictionHistoryItem
 import com.app.model.ImageData
 import com.app.model.ResultState
@@ -12,7 +13,7 @@ import com.app.unet.domain.usecases.SplitImageIntoTilesUseCase
 import javax.inject.Inject
 
 class SegmentationUseCase @Inject constructor(
-    @param:LiteRTModel private val model: UnetModel,
+    @param:PytorchModel private val model: UnetModel,
     private val imageToTiles: SplitImageIntoTilesUseCase,
 ) {
     operator fun invoke(
@@ -21,11 +22,18 @@ class SegmentationUseCase @Inject constructor(
     ): ResultState<SegmentationResult, String> {
         val tiles = imageToTiles(bitmap)
 
+        val (javaMemoryBefore, nativeMemoryBefore) = ramUsage()
+
         val startTime = System.currentTimeMillis()
         val result = model.predict(
             ImageData(bitmap.width, bitmap.height, tiles)
         )
         val totalTime = System.currentTimeMillis() - startTime
+
+        val (javaMemoryAfter, nativeMemoryAfter) = ramUsage()
+        val javaUsed = (javaMemoryAfter - javaMemoryBefore).coerceAtLeast(0L)
+        val nativeUsed = (nativeMemoryAfter - nativeMemoryBefore).coerceAtLeast(0L)
+        val totalMemoryBytes = javaUsed + nativeUsed
 
         return when(result) {
             is ResultState.Error -> ResultState.Error(result.error)
@@ -33,8 +41,30 @@ class SegmentationUseCase @Inject constructor(
                 SegmentationResult(
                     labeledData = result.data,
                     totalTimeMs = totalTime,
+                    memoryUsageBytes = totalMemoryBytes
                 )
             )
         }
+    }
+
+    /**
+     * Измеряет текущее потребление оперативной памяти.
+     *
+     * @return Pair, где:
+     * - first (Long): Занятая память в JVM Heap (в байтах).
+     *   Здесь хранятся объекты Kotlin/Java, такие как массивы FloatArray в [TFLiteModel.kt],
+     *   объекты Tile и Bitmap.
+     *
+     * - second (Long): Занятая память в Native Heap (в байтах).
+     *   Это критически важный показатель для ML, так как библиотеки LiteRT (TFLite)
+     *   и PyTorch Mobile выделяют основную память под веса моделей и тензоры
+     *   на уровне C++, минуя Garbage Collector.
+     */
+    private fun ramUsage(): Pair<Long, Long> {
+        val runtime = Runtime.getRuntime()
+        val javaMemory = runtime.totalMemory() - runtime.freeMemory()
+        val nativeMemory = Debug.getNativeHeapAllocatedSize()
+
+        return Pair(javaMemory, nativeMemory)
     }
 }

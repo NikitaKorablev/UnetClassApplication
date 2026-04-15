@@ -24,8 +24,7 @@ import javax.inject.Inject
 import kotlin.math.min
 
 class PyTorchModel @Inject constructor(
-    @ApplicationContext
-    context: Context,
+    val context: Context
 ): UnetModel {
     private val module: Module
     init {

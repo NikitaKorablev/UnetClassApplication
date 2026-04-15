@@ -22,7 +22,6 @@ import org.tensorflow.lite.support.common.ops.NormalizeOp
 import org.tensorflow.lite.support.image.ImageProcessor
 import org.tensorflow.lite.support.image.ops.TransformToGrayscaleOp
 import javax.inject.Inject
-import kotlin.math.min
 
 class TFLiteModel @Inject constructor(
     val context: Context
@@ -119,10 +118,10 @@ class TFLiteModel @Inject constructor(
         val output = outputBuffers[0].readFloat()
         val expectedOutputSize = Tile.SIZE * Tile.SIZE * PredictedClasses.NUM_CLASSES
 
-        Log.d(TAG, "=== Tile Predict Debug ===")
-        Log.d(TAG, "Tile position: (${tile.startX}, ${tile.startY})")
-        Log.d(TAG, "Expected output size: $expectedOutputSize")
-        Log.d(TAG, "Actual output size: ${output.size}")
+//        Log.d(TAG, "=== Tile Predict Debug ===")
+//        Log.d(TAG, "Tile position: (${tile.startX}, ${tile.startY})")
+//        Log.d(TAG, "Expected output size: $expectedOutputSize")
+//        Log.d(TAG, "Actual output size: ${output.size}")
 
         require(output.size == expectedOutputSize) {
             "Output size mismatch: expected $expectedOutputSize, got ${output.size}"

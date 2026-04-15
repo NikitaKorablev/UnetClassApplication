@@ -1,12 +1,39 @@
 {
-  "mcpServers": {
-    "context7": {
-      "httpUrl": "https://mcp.context7.com/mcp",
-      "headers": {
-        "CONTEXT7_API_KEY": "ctx7sk-b629cf44-37aa-413e-9f9c-28d315dd919d",
-        "Accept": "application/json, text/event-stream"
-      }
-    }
+  "env": {
+    "GEMINI_API_KEY": "AIzaSyDVaYwHaBAC4EIcrV_QzQR3giMpTcwThYo"
   },
-  "$version": 3
+  "modelProviders": {
+    "gemini": [
+      {
+        "id": "gemini-2.0-flash",
+        "name": "Gemini 2.0 Flash",
+        "envKey": "GEMINI_API_KEY",
+        "baseUrl": "https://generativelanguage.googleapis.com",
+        "capabilities": {
+          "vision": true
+        },
+        "generationConfig": {
+          "timeout": 60000,
+          "maxRetries": 2,
+          "contextWindowSize": 1000000,
+          "schemaCompliance": "auto",
+          "samplingParams": {
+            "temperature": 0.4,
+            "top_p": 0.95,
+            "max_tokens": 8192,
+            "top_k": 40
+          }
+        }
+      }
+    ]
+  },
+  "$version": 3,
+  "model": {
+    "name": "gemini-2.0-flash"
+  },
+  "security": {
+    "auth": {
+      "selectedType": "gemini"
+    }
+  }
 }
