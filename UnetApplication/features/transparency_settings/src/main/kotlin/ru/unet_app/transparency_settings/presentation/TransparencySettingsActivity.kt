@@ -1,4 +1,4 @@
-package com.app.transparency_settings.presentation
+package ru.unet_app.transparency_settings.presentation
 
 import android.graphics.Bitmap
 import android.os.Bundle
@@ -7,12 +7,12 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.app.model.PredictedClasses
-import com.app.model.TransparencyState
-import com.app.transparency_settings.databinding.ActivityTransparencySettingsBinding
+import com.app.transparency_settings.presentation.TransparencyViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import ru.unet_app.transparency_settings.databinding.ActivityTransparencySettingsBinding
 
 @AndroidEntryPoint
 class TransparencySettingsActivity : AppCompatActivity() {

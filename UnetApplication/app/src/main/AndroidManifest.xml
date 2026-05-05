@@ -26,16 +26,16 @@
         </activity>
 
         <activity
-            android:name=".features.detail.DetailActivity"
+            android:name="ru.unet_app.inference_details.presentation.detail.DetailActivity"
             android:exported="false" />
 
         <activity
-            android:name=".features.fullscreen.FullscreenActivity"
+            android:name="ru.unet_app.inference_details.presentation.fullscreen.FullscreenActivity"
             android:exported="false"
             android:theme="@style/Theme.AppCompat.NoActionBar" />
 
         <activity
-            android:name="com.app.transparency_settings.presentation.TransparencySettingsActivity"
+            android:name="ru.unet_app.transparency_settings.presentation.TransparencySettingsActivity"
             android:exported="false" />
     </application>
 

@@ -13,7 +13,7 @@ import com.app.unet.domain.usecases.SplitImageIntoTilesUseCase
 import javax.inject.Inject
 
 class SegmentationUseCase @Inject constructor(
-    @param:LiteRTModel private val model: UnetModel,
+    @param:PytorchModel private val model: UnetModel,
     private val imageToTiles: SplitImageIntoTilesUseCase,
 ) {
     operator fun invoke(

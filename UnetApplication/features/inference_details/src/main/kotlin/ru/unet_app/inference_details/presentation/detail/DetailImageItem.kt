@@ -1,4 +1,4 @@
-package com.app.unetclass.features.detail
+package ru.unet_app.inference_details.presentation.detail
 
 data class DetailImageItem(
     val imagePath: String,

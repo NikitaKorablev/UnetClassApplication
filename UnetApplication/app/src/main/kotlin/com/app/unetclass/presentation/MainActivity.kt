@@ -13,7 +13,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.app.domain.utils.Router
 import com.app.unetclass.databinding.ActivityMainBinding
-import com.app.unetclass.features.detail.DetailActivity
+import ru.unet_app.inference_details.presentation.detail.DetailActivity
 import com.app.unetclass.presentation.viewmodel.MainViewModel
 import com.app.unetclass.utils.AppNavigationComponent
 import com.app.unetclass.utils.MainActivityNav
@@ -77,10 +77,9 @@ class MainActivity : AppCompatActivity() {
 
         binding.moreInfoButton.setOnClickListener {
             viewModel.selectedHistoryItem.value?.let { historyItem ->
-                val intent = Intent(this, DetailActivity::class.java).apply {
-                    putExtra("prediction_path", historyItem.outputPath)
-                }
-                startActivity(intent)
+                (router as MainActivityNav).toInferenceDetails(
+                    this, historyItem.outputPath
+                )
             } ?: run {
                 Toast.makeText(
                     this,

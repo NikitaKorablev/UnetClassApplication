@@ -1,4 +1,4 @@
-package com.app.unetclass.features.detail
+package ru.unet_app.inference_details.presentation.detail
 
 import android.content.Intent
 import android.os.Bundle
@@ -7,8 +7,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.app.model.ClassNames
-import com.app.unetclass.R
-import com.app.unetclass.features.fullscreen.FullscreenActivity
+import ru.unet_app.inference_details.R
+import ru.unet_app.inference_details.presentation.fullscreen.FullscreenActivity
 import java.io.File
 
 class DetailActivity : AppCompatActivity() {

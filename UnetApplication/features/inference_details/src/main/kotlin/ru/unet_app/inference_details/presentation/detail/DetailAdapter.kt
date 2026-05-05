@@ -1,4 +1,4 @@
-package com.app.unetclass.features.detail
+package ru.unet_app.inference_details.presentation.detail
 
 import android.view.LayoutInflater
 import android.view.View
@@ -6,7 +6,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.app.unetclass.R
+import ru.unet_app.inference_details.R
 import com.bumptech.glide.Glide
 
 class DetailAdapter(
@@ -38,12 +38,6 @@ class DetailAdapter(
                 .error(android.R.drawable.ic_menu_report_image)
                 .into(imageView)
 
-            // Отображение имени файла и класса (если доступно)
-//            val displayName = if (item.className != null) {
-//                "${item.className}: ${item.imageName}"
-//            } else {
-//                item.imageName
-//            }
             nameTextView.text = item.imageName
 
             itemView.setOnClickListener {

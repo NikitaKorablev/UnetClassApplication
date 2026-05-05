@@ -2,8 +2,9 @@ package com.app.unetclass.utils
 
 import android.content.Context
 import android.content.Intent
-import com.app.transparency_settings.presentation.TransparencySettingsActivity
 import com.app.model.ClassNames
+import ru.unet_app.transparency_settings.presentation.TransparencySettingsActivity
+import ru.unet_app.inference_details.presentation.detail.DetailActivity
 
 class AppNavigationComponent: MainActivityNav {
     override fun toTransparencySettings(context: Context, lastSavedPath: String) {
@@ -24,6 +25,13 @@ class AppNavigationComponent: MainActivityNav {
             putStringArrayListExtra("class_masks_paths", ArrayList(classMaskPaths))
         }
 
+        context.startActivity(intent)
+    }
+
+    override fun toInferenceDetails(context: Context, outputPath: String) {
+        val intent = Intent(context, DetailActivity::class.java).apply {
+            putExtra("prediction_path", outputPath)
+        }
         context.startActivity(intent)
     }
 }

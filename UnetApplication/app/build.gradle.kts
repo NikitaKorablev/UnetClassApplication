@@ -62,6 +62,7 @@ dependencies {
     implementation(projects.core.unet)
     implementation(projects.core.datastore)
     implementation(projects.features.transparencySettings)
+    implementation(projects.features.inferenceDetails)
 
     // Dagger-Hilt
     implementation(libs.hilt.android)
@@ -84,12 +85,6 @@ dependencies {
     // ViewModel
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
     implementation(libs.androidx.activity.ktx)
-
-    // PhotoView для масштабирования изображений
-    implementation("com.github.chrisbanes:PhotoView:2.3.0")
-    // Glide для загрузки и кэширования изображений
-    implementation("com.github.bumptech.glide:glide:4.15.1")
-    annotationProcessor("com.github.bumptech.glide:compiler:4.15.1")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
