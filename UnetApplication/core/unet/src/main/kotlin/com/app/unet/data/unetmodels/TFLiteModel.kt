@@ -18,6 +18,7 @@ import com.app.unet.models.classes.PSD
 import com.app.unet.models.classes.Vesicles
 import com.google.ai.edge.litert.Accelerator
 import com.google.ai.edge.litert.CompiledModel
+import com.google.ai.edge.litert.TensorBuffer
 import org.tensorflow.lite.support.common.ops.NormalizeOp
 import org.tensorflow.lite.support.image.ImageProcessor
 import org.tensorflow.lite.support.image.ops.TransformToGrayscaleOp
@@ -26,13 +27,37 @@ import javax.inject.Inject
 class TFLiteModel @Inject constructor(
     val context: Context
 ): UnetModel {
-    private val model = CompiledModel.create(
-        context.assets,
-        MODEL_PATH,
-        CompiledModel.Options(Accelerator.GPU),
-    )
-    private val inputBuffers = model.createInputBuffers()
-    private val outputBuffers = model.createOutputBuffers()
+    private val model: CompiledModel
+    private val inputBuffers: List<TensorBuffer>
+    private val outputBuffers: List<TensorBuffer>
+
+    init {
+        val result = try {
+            val m = CompiledModel.create(
+                context.assets,
+                MODEL_PATH,
+                CompiledModel.Options(Accelerator.GPU)
+            )
+            val i = m.createInputBuffers()
+            val o = m.createOutputBuffers()
+            Log.i(TAG, "LiteRT initialized successfully with GPU acceleration.")
+            Triple(m, i, o)
+        } catch (e: Exception) {
+            Log.w(TAG, "GPU acceleration failed. Falling back to CPU.", e)
+            val m = CompiledModel.create(
+                context.assets,
+                MODEL_PATH,
+                CompiledModel.Options(Accelerator.CPU)
+            )
+            val i = m.createInputBuffers()
+            val o = m.createOutputBuffers()
+            Log.i(TAG, "LiteRT initialized with CPU.")
+            Triple(m, i, o)
+        }
+        model = result.first
+        inputBuffers = result.second
+        outputBuffers = result.third
+    }
 
     private val imageProcessor = ImageProcessor.Builder()
         .add(NormalizeOp(0f, 255f))
