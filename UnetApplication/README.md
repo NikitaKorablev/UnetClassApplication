@@ -41,7 +41,8 @@ UnetClass/
 │   ├── :core:datastore           # Data persistence & repositories
 │   └── :core:unet                # ML inference engine (PyTorch & TFLite)
 └── :features
-    └── :features:transparency_settings  # Feature module for UI settings
+    ├── :features:inference_details      # Inference details & fullscreen view
+    └── :features:transparency_settings  # UI for adjusting visualization opacities
 ```
 
 ## Module dependency graph
@@ -61,12 +62,14 @@ graph TB
   :core:datastore[core:datastore]:::android-library
   :core:domain[core:domain]:::android-library
   :features:transparency_settings[features:transparency_settings]:::android-feature
+  :features:inference_details[features:inference_details]:::android-feature
 
   :app --> :core:unet
   :app --> :core:model
   :app --> :core:datastore
   :app --> :core:domain
   :app --> :features:transparency_settings
+  :app --> :features:inference_details
   
   :core:unet --> :core:model
   :core:unet --> :core:datastore
@@ -76,6 +79,8 @@ graph TB
   :features:transparency_settings --> :core:domain
   :features:transparency_settings --> :core:model
   :features:transparency_settings --> :core:datastore
+
+  :features:inference_details --> :core:model
 
 classDef android-application fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;
 classDef android-feature fill:#FFD6A5,stroke:#000,stroke-width:2px,color:#000;
@@ -117,15 +122,14 @@ classDef unknown fill:#FFADAD,stroke:#000,stroke-width:2px,color:#000;
 | **`:core:model`** | Android Library | Shared domain models & data classes | `Tile`, `ImageData`, `PredictedClasses`, `TransparencyState`, `ResultState` |
 | **`:core:datastore`** | Android Library | Data persistence & repository implementations | `ImageRepository`, `PredictionHistoryRepository`, `ImageSaver` |
 | **`:core:domain`** | Android Library | Pure Kotlin domain layer with business logic | `Router` interface |
+| **`:features:inference_details`** | Android Feature | Detailed inference results & fullscreen viewer | `DetailActivity`, `FullscreenActivity` |
 | **`:features:transparency_settings`** | Android Feature | UI for adjusting class visualization opacities | `TransparencySettingsActivity`, `TransparencyViewModel` |
 
 > ⚠️ **Architecture Refactoring In Progress**  
 > Currently, some modules violate strict Clean Architecture principles (e.g., `:features:transparency_settings` and `:core:unet` depend directly on `:core:datastore`). Active work is underway to eliminate these dependencies by introducing proper domain interfaces and ensuring feature modules only depend on the domain layer, not data implementations.
 >
 > 🔧 **Feature Extraction In Progress**  
-> The `:app` module still contains several features that should be extracted into dedicated feature modules:
-> - **Detail View** (`features.detail`) - Display individual class masks from prediction results
-> - **Fullscreen View** (`features.fullscreen`) - Zoomable image viewer with PhotoView
+> The `:app` module still contains components that should be extracted into dedicated feature modules:
 > - **History Component** (`presentation.HistoryAdapter`) - Prediction history list UI  
 > These will be progressively moved to separate `:features:*` modules to reduce `:app` module coupling and improve modularity.
 
