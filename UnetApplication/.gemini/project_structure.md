@@ -10,7 +10,8 @@
 | `:core:model` | `core/model/src/main/kotlin/` | `com.app.model` | Shared domain models & data classes. |
 | `:core:datastore` | `core/datastore/src/main/kotlin/` | `com.app.datastore` | Local persistence (Jetpack DataStore). |
 | `:core:domain` | `core/domain/src/main/kotlin/` | `com.app.domain` | Common business logic/utils. |
-| `:features:transparency_settings` | `features/transparency_settings/src/main/kotlin/` | `com.app.transparency_settings` | Transparency settings feature. |
+| `:features:inference_details` | `features/inference_details/src/main/kotlin/` | `ru.unet_app.inference_details` | Inference details feature. |
+| `:features:transparency_settings` | `features/transparency_settings/src/main/kotlin/` | `ru.unet_app.transparency_settings` | Transparency settings feature. |
 
 ## 🏗 Layer Structure (Internal Module Organization)
 Most modules follow a Clean Architecture pattern:
@@ -35,7 +36,8 @@ Most modules follow a Clean Architecture pattern:
 - `:app`: `com.app.unetclass.di`
 - `:core:unet`: `com.app.unet.di`
 - `:core:datastore`: `com.app.datastore.di`
-- `:features:transparency_settings`: `com.app.transparency_settings.di`
+- `:features:inference_details`: `ru.unet_app.inference_details.di`
+- `:features:transparency_settings`: `ru.unet_app.transparency_settings.di`
 
 ## 🎨 UI Resources
 - **App Layouts:** `app/src/main/res/layout/`

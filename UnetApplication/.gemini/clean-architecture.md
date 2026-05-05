@@ -29,8 +29,9 @@ The project is divided into layers:
 
 ## Package Naming
 
-Follow the base package `com.app.*` corresponding to the module name:
+Note: While core modules use the `com.app.*` prefix, feature modules currently use `ru.unet_app.*`.
 - `:app` -> `com.app.unetclass`
 - `:core:unet` -> `com.app.unet`
 - `:core:datastore` -> `com.app.datastore`
-- `:features:transparency_settings` -> `com.app.transparency_settings`
+- `:features:inference_details` -> `ru.unet_app.inference_details`
+- `:features:transparency_settings` -> `ru.unet_app.transparency_settings`
