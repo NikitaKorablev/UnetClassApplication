@@ -3,6 +3,7 @@ package com.app.unetclass.domain.usecases
 import android.graphics.Bitmap
 import com.app.datastore.domain.repository.ImageRepository
 import com.app.model.ClassNames
+import com.app.model.InferenceMetadata
 import com.app.unet.data.ImageStitcherResult
 import javax.inject.Inject
 
@@ -12,16 +13,24 @@ class SaveImageStitcherUseCase @Inject constructor(
     /**
      * Сохраняет результаты сегментации в указанную папку
      *
-     * @param result Результат сегментации
-     * @param context Контекст приложения для доступа к файловой системе
-     * @return `true`, если сохранение прошло успешно, иначе `false`
+     * @param unitedMask Финальная маска
+     * @param classMasks Список масок для каждого класса
+     * @param metadata Метаданные инференса
+     * @return Путь к папке с результатами
      */
-    operator fun invoke(unitedMask: Bitmap, classMasks: List<Bitmap>): String {
+    operator fun invoke(
+        unitedMask: Bitmap,
+        classMasks: List<Bitmap>,
+        metadata: InferenceMetadata
+    ): String {
         // Создаем уникальную папку для сохранения результатов
         val resultsDir = imageRepository.createResultsDirectory()
 
         // Сохраняем путь для последующего использования
         val lastSavedPath = resultsDir.absolutePath
+
+        // Сохраняем метаданные
+        imageRepository.saveMetadata(metadata, resultsDir)
 
         // Сохраняем финальную маску
         val unitedMaskSaved = imageRepository.saveImage(

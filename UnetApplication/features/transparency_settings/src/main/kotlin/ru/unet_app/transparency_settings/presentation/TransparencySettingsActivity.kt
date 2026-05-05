@@ -28,6 +28,7 @@ class TransparencySettingsActivity : AppCompatActivity() {
         setupData()
         setupSaveButton()
         subscribeOnPreviewImage()
+        observeMetadata()
     }
 
     private fun setupSeekBars() {
@@ -90,6 +91,19 @@ class TransparencySettingsActivity : AppCompatActivity() {
     private fun savePreviewImage() {
         val previewSaved = viewModel.savePreviewImage()
         if (previewSaved) finish()
+    }
+
+    private fun observeMetadata() {
+        lifecycleScope.launch {
+            viewModel.metadata.collect { metadata ->
+                metadata?.let {
+                    binding.resolutionText.text = "Разрешение: ${it.width} x ${it.height}"
+                    binding.executionTimeText.text = "Время выполнения: ${it.executionTimeMs} мс"
+                    val memoryMB = it.memoryUsageBytes / (1024 * 1024)
+                    binding.memoryUsageText.text = "Использование памяти: $memoryMB МБ"
+                }
+            }
+        }
     }
 
     inline fun SeekBar.onProgressChanged(crossinline action: (Int) -> Unit) {

@@ -5,6 +5,7 @@ import android.graphics.BitmapFactory
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.app.datastore.domain.repository.ImageRepository
+import com.app.model.InferenceMetadata
 import com.app.model.PredictedClasses
 import com.app.transparency_settings.domain.repository.TransparencyImageProcRepository
 import com.app.model.TransparencyState
@@ -32,6 +33,9 @@ class TransparencyViewModel @Inject constructor(
 
     private val _transparencyState = MutableStateFlow(TransparencyState())
     val transparencyState: StateFlow<TransparencyState> = _transparencyState.asStateFlow()
+
+    private val _metadata = MutableStateFlow<InferenceMetadata?>(null)
+    val metadata: StateFlow<InferenceMetadata?> = _metadata.asStateFlow()
 
     init {
         _transparencyState
@@ -65,6 +69,9 @@ class TransparencyViewModel @Inject constructor(
 
             outputPath = resultPath
         }
+
+        // Загружаем метаданные
+        _metadata.value = imageRepository.loadMetadata(File(resultPath))
     }
 
     fun updateTransparency(type: PredictedClasses, value: Int) {

@@ -160,6 +160,43 @@
                     android:progress="100" />
             </LinearLayout>
 
+            <!-- Блок метаданных -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@android:color/darker_gray"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="16dp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Статистика инференса:"
+                android:textSize="18sp"
+                android:layout_marginBottom="8dp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/resolutionText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Разрешение: --"
+                android:layout_marginBottom="4dp" />
+
+            <TextView
+                android:id="@+id/executionTimeText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Время выполнения: --"
+                android:layout_marginBottom="4dp" />
+
+            <TextView
+                android:id="@+id/memoryUsageText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Использование памяти: --"
+                android:layout_marginBottom="16dp" />
+
         </LinearLayout>
     </ScrollView>
 

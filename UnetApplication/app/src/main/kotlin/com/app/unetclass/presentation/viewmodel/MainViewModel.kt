@@ -10,6 +10,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.app.datastore.data.PredictionHistoryItem
+import com.app.model.InferenceMetadata
 import com.app.model.ResultState
 import com.app.unet.models.SegmentationResult
 import com.app.unetclass.domain.usecases.SaveImageStitcherUseCase
@@ -100,9 +101,18 @@ class MainViewModel @Inject constructor(
                     Log.d(TAG, "Memory usage: ${memoryInMB}Мб")
 
                     val unitedMask = result.data.labeledData.unitedMask()
+                    
+                    val metadata = InferenceMetadata(
+                        width = result.data.labeledData.width,
+                        height = result.data.labeledData.height,
+                        executionTimeMs = result.data.totalTimeMs,
+                        memoryUsageBytes = result.data.memoryUsageBytes
+                    )
+
                     val outputPath = saveImageStitcher(
                         unitedMask,
-                        result.data.labeledData.labels.map { it.getMask().bitmap }
+                        result.data.labeledData.labels.map { it.getMask().bitmap },
+                        metadata
                     )
                     newHistoryItem(outputPath, result.data)
 
@@ -161,6 +171,7 @@ class MainViewModel @Inject constructor(
                 Locale.getDefault()
             ).format(Date()),
             executionTime = data.totalTimeMs,
+            memoryUsageBytes = data.memoryUsageBytes,
             outputPath = outputPath,
             imageWidth = data.labeledData.width,
             imageHeight = data.labeledData.height

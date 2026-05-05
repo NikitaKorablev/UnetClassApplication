@@ -5,6 +5,9 @@ import android.graphics.BitmapFactory
 import android.os.Environment
 import com.app.datastore.data.PredictionHistoryItem
 import com.app.datastore.domain.repository.PredictionHistoryRepository
+import com.app.model.ClassNames
+import com.app.model.InferenceMetadata
+import org.json.JSONObject
 import java.io.File
 
 class PredictionHistoryRepositoryImpl
@@ -39,7 +42,7 @@ class PredictionHistoryRepositoryImpl
     private fun isPredictionDirectoryValid(directory: File): Boolean {
         // Проверяем наличие всех необходимых файлов
         val requiredFiles = listOf("united_mask.png") +
-            (0 until NUM_CLASSES).map { "class_$it.png" }
+                ClassNames.NAMES.map { "${it}_prediction.png" }
 
         for (fileName in requiredFiles) {
             val file = File(directory, fileName)
@@ -78,21 +81,50 @@ class PredictionHistoryRepositoryImpl
     private fun createHistoryItemFromDirectory(directory: File): PredictionHistoryItem? {
         if (!isPredictionDirectoryValid(directory)) return null
 
+        val metadataFile = File(directory, "metadata.json")
+        val metadata = if (metadataFile.exists()) {
+            try {
+                val json = JSONObject(metadataFile.readText())
+                InferenceMetadata(
+                    width = json.getInt("width"),
+                    height = json.getInt("height"),
+                    executionTimeMs = json.getLong("executionTimeMs"),
+                    memoryUsageBytes = json.getLong("memoryUsageBytes")
+                )
+            } catch (e: Exception) {
+                null
+            }
+        } else null
 
         // Извлекаем временную метку из имени папки
         val timestamp = directory.name
         val outputPath = directory.absolutePath
 
         // Получаем размерности изображения
-        val dimensions = getImageDimensions(
-            File(directory, "united_mask.png").absolutePath
-        ) ?: return null
+        val width: Int
+        val height: Int
+        val executionTime: Long
+        val memoryUsage: Long
 
-        val (width, height) = dimensions
+        if (metadata != null) {
+            width = metadata.width
+            height = metadata.height
+            executionTime = metadata.executionTimeMs
+            memoryUsage = metadata.memoryUsageBytes
+        } else {
+            val dimensions = getImageDimensions(
+                File(directory, "united_mask.png").absolutePath
+            ) ?: return null
+            width = dimensions.first
+            height = dimensions.second
+            executionTime = 0
+            memoryUsage = 0
+        }
 
         return PredictionHistoryItem(
             timestamp = timestamp,
-            executionTime = 0, // Точное время выполнения недоступно из файловой системы
+            executionTime = executionTime,
+            memoryUsageBytes = memoryUsage,
             outputPath = outputPath,
             imageWidth = width,
             imageHeight = height
