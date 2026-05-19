@@ -54,60 +54,27 @@ data class LabeledData(
     val height: Int
         get() = PSD.height
 
-
     fun unitedMask(alphas: TransparencyState = TransparencyState()): Bitmap {
+        val startTime = System.currentTimeMillis()
         val resultBitmap = createBitmap(width, height)
         val canvas = Canvas(resultBitmap)
         canvas.drawColor(Color.BLACK)
 
+        val paint = Paint().apply {
+            xfermode = PorterDuffXfermode(PorterDuff.Mode.LIGHTEN)
+            isAntiAlias = false
+        }
         labels.forEach{ label ->
             val alphaFloat = alphas[label.type]
-            val paint = Paint().apply {
-                alpha = (alphaFloat * 255).toInt().coerceIn(0, 255)
-                xfermode = PorterDuffXfermode(PorterDuff.Mode.LIGHTEN)
-                isAntiAlias = false
-            }
+            paint.alpha = (alphaFloat * 255).toInt().coerceIn(0, 255)
 
             val bitmap = label.getMask().bitmap
             canvas.drawBitmap(bitmap, 0f, 0f, paint)
         }
 
+        val duration = System.currentTimeMillis() - startTime
+        android.util.Log.d("Analytics", "unitedMask execution time: $duration ms")
         return resultBitmap
-    }
-
-    fun createUnitedMask(): Bitmap {
-        val colors = IntArray(width * height)
-        var maxClass: Int
-        var maxProb: Float
-
-        for (y in 0 until height) {
-            for (x in 0 until width) {
-                maxClass = 0
-                maxProb = -1.0f
-
-                // Найти класс с максимальной вероятностью (argmax)
-                for (c in 0 until CLASSES_COUNT) {
-                    val prob = labels[y].label[x][c]
-                    if (prob > maxProb) {
-                        maxProb = prob
-                        maxClass = c
-                    }
-                }
-
-                // Перевести вероятности в 0-255 и выбрать один канал для Grayscale вывода.
-                // В вашем коде используется to_0_255_format_img, что подразумевает
-                // конвертацию в uint8. Для визуализации мы можем просто взять
-                // номер класса * 40 (для визуального различия)
-                val colorValue = (maxClass * (255 / (CLASSES_COUNT - 1))).coerceIn(0, 255)
-
-                // Создание Grayscale цвета (RGB=value)
-                colors[y * width + x] = 0xFF shl 24 or (colorValue shl 16) or (colorValue shl 8) or colorValue
-            }
-        }
-
-        val outputBitmap = createBitmap(width, height)
-        outputBitmap.setPixels(colors, 0, width, 0, 0, width, height)
-        return outputBitmap
     }
 
     companion object {

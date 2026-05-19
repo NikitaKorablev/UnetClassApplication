@@ -35,6 +35,10 @@ class MainViewModel @Inject constructor(
     private val _bitmap = MutableLiveData<Bitmap?>()
     val bitmap: LiveData<Bitmap?> = _bitmap
 
+    // LiveData для типа модели (false - LiteRT/TFLite, true - PyTorch)
+    private val _usePyTorch = MutableLiveData<Boolean>(false)
+    val usePyTorch: LiveData<Boolean> = _usePyTorch
+
     // LiveData для URI выбранного изображения
     private val _selectedImageUri = MutableLiveData<Uri?>()
     val selectedImageUri: LiveData<Uri?> = _selectedImageUri
@@ -88,7 +92,7 @@ class MainViewModel @Inject constructor(
             }
         ) {
             Log.i(TAG, "Segmentation started")
-            val result = startSegmentation(inputBitmap) { historyItems ->
+            val result = startSegmentation(inputBitmap, _usePyTorch.value ?: false) { historyItems ->
                 // Обновляем список истории
                 val currentItems = _historyItems.value ?: emptyList()
                 _historyItems.value = historyItems + currentItems
@@ -129,6 +133,10 @@ class MainViewModel @Inject constructor(
                 is ResultState.Error -> throw Exception(result.error)
             }
         }
+    }
+
+    fun setModelType(usePyTorch: Boolean) {
+        _usePyTorch.value = usePyTorch
     }
 
     fun clearSegmentationResultEvent() {

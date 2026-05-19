@@ -11,15 +11,30 @@ import com.app.unet.domain.UnetModel
 import com.app.unet.models.SegmentationResult
 import com.app.unet.domain.usecases.SplitImageIntoTilesUseCase
 import javax.inject.Inject
+import javax.inject.Provider
 
 class SegmentationUseCase @Inject constructor(
-    @param:LiteRTModel private val model: UnetModel,
+    @LiteRTModel private val liteRTModelProvider: Provider<UnetModel>,
+    @PytorchModel private val pytorchModelProvider: Provider<UnetModel>,
     private val imageToTiles: SplitImageIntoTilesUseCase,
 ) {
+    private var currentModel: UnetModel? = null
+    private var isUsingPyTorch: Boolean? = null
+
     operator fun invoke(
         bitmap: Bitmap,
+        usePyTorch: Boolean = false,
         onHistoryUpdate: (List<PredictionHistoryItem>) -> Unit
     ): ResultState<SegmentationResult, String> {
+        // Проверяем, нужно ли сменить или инициализировать модель
+        if (currentModel == null || isUsingPyTorch != usePyTorch) {
+            currentModel?.close()
+            currentModel = if (usePyTorch) pytorchModelProvider.get() else liteRTModelProvider.get()
+            isUsingPyTorch = usePyTorch
+        }
+
+        val model = currentModel!!
+
         val tiles = imageToTiles(bitmap)
 
         val (javaMemoryBefore, nativeMemoryBefore) = ramUsage()

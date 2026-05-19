@@ -13,8 +13,10 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.core.view.GravityCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.app.domain.utils.Router
+import com.app.unetclass.R
 import com.app.unetclass.databinding.ActivityMainBinding
 import ru.unet_app.inference_details.presentation.detail.DetailActivity
 import com.app.unetclass.presentation.viewmodel.MainViewModel
@@ -88,6 +90,19 @@ class MainActivity : AppCompatActivity() {
                 this,
                 viewModel.lastSavedPath
             )
+        }
+
+        binding.menuBtn.setOnClickListener {
+            binding.drawerLayout.openDrawer(GravityCompat.END)
+        }
+
+        binding.navigationView.setNavigationItemSelectedListener { item ->
+            when (item.itemId) {
+                R.id.model_tflite -> viewModel.setModelType(false)
+                R.id.model_pytorch -> viewModel.setModelType(true)
+            }
+            binding.drawerLayout.closeDrawer(GravityCompat.END)
+            true
         }
 
         binding.moreInfoButton.setOnClickListener {
@@ -169,6 +184,16 @@ class MainActivity : AppCompatActivity() {
         viewModel.selectedHistoryItem.observe(this) { selectedHistoryItem ->
             // Обработка изменения выбранного элемента истории
             // Может потребоваться дополнительная логика
+        }
+
+        // Подписка на тип модели для синхронизации меню
+        viewModel.usePyTorch.observe(this) { usePyTorch ->
+            val menu = binding.navigationView.menu
+            if (usePyTorch) {
+                menu.findItem(R.id.model_pytorch).isChecked = true
+            } else {
+                menu.findItem(R.id.model_tflite).isChecked = true
+            }
         }
 
         // Подписка на сообщения об ошибках

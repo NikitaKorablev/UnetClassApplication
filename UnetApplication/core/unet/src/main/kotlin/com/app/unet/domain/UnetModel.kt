@@ -11,6 +11,11 @@ import kotlin.math.min
 interface UnetModel {
     fun predict(inputImageData: ImageData): ResultState<LabeledData, String>
 
+    /**
+     * Освобождает ресурсы модели (Native Heap).
+     */
+    fun close()
+
     fun stitchTile(
         outputData: FloatArray,
         tileInfo: Tile, // или как называется объект в inputImageData.tiles

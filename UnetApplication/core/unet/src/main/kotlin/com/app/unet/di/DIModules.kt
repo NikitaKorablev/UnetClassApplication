@@ -15,7 +15,6 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 class Modules {
     @Provides
-    @Singleton
     @PytorchModel
     fun providePyTorchModel(
         @ApplicationContext
@@ -23,7 +22,6 @@ class Modules {
     ): UnetModel = PyTorchModel(context)
 
     @Provides
-    @Singleton
     @LiteRTModel
     fun provideLiteRTModel(
         @ApplicationContext

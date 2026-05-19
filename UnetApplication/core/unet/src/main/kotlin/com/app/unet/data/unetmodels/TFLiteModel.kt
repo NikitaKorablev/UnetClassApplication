@@ -95,6 +95,11 @@ class TFLiteModel @Inject constructor(
         return ResultState.Success(result)
     }
 
+    override fun close() {
+        model.close()
+        Log.d(TAG, "TFLite model closed.")
+    }
+
     private fun tilePredict(tile: Tile): FloatArray {
 //        val grayBitmap = tile.bitmap.copy(Bitmap.Config.ARGB_8888, true).apply {
 //            val canvas = android.graphics.Canvas(this)

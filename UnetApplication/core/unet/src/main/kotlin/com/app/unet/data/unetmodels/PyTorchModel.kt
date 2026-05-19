@@ -55,6 +55,11 @@ class PyTorchModel @Inject constructor(
         }
     }
 
+    override fun close() {
+        module.destroy()
+        Log.d(TAG, "PyTorch model destroyed.")
+    }
+
     /**
      * Выполняет предсказание для батча тензоров.
      * Аналог model_pipeliner.predict(img_generator)
