@@ -1,4 +1,4 @@
-package com.app.datastore.domain.repository
+package ru.unet_app.datastore.domain.repository
 
 import android.graphics.Bitmap
 import com.app.model.InferenceMetadata

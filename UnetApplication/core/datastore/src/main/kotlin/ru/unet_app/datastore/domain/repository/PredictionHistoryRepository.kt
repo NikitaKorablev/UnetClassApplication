@@ -1,7 +1,7 @@
-package com.app.datastore.domain.repository
+package ru.unet_app.datastore.domain.repository
 
 import android.content.Context
-import com.app.datastore.data.PredictionHistoryItem
+import ru.unet_app.datastore.data.PredictionHistoryItem
 
 interface PredictionHistoryRepository {
     suspend fun getAllSavedPredictions(context: Context): List<PredictionHistoryItem>

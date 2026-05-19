@@ -1,6 +1,5 @@
 package com.app.unetclass.presentation
 
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -15,12 +14,10 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.app.domain.utils.Router
+import ru.unet_app.domain.utils.Router
 import com.app.unetclass.R
 import com.app.unetclass.databinding.ActivityMainBinding
-import ru.unet_app.inference_details.presentation.detail.DetailActivity
 import com.app.unetclass.presentation.viewmodel.MainViewModel
-import com.app.unetclass.utils.AppNavigationComponent
 import com.app.unetclass.utils.MainActivityNav
 import dagger.hilt.android.AndroidEntryPoint
 import java.io.File

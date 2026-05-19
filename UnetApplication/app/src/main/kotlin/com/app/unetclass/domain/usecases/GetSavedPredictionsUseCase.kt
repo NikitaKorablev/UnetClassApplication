@@ -1,8 +1,8 @@
 package com.app.unetclass.domain.usecases
 
 import android.content.Context
-import com.app.datastore.data.PredictionHistoryItem
-import com.app.datastore.domain.repository.PredictionHistoryRepository
+import ru.unet_app.datastore.data.PredictionHistoryItem
+import ru.unet_app.datastore.domain.repository.PredictionHistoryRepository
 import javax.inject.Inject
 
 class GetSavedPredictionsUseCase @Inject constructor(

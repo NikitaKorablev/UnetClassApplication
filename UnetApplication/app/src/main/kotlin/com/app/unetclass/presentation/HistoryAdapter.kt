@@ -6,7 +6,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
-import com.app.datastore.data.PredictionHistoryItem
+import ru.unet_app.datastore.data.PredictionHistoryItem
 import com.app.unetclass.R
 
 class HistoryAdapter(

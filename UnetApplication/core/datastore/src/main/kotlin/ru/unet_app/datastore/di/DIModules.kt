@@ -1,10 +1,10 @@
-package com.app.datastore.di
+package ru.unet_app.datastore.di
 
 import android.content.Context
-import com.app.datastore.data.repository.ImageRepositoryImpl
-import com.app.datastore.data.repository.PredictionHistoryRepositoryImpl
-import com.app.datastore.domain.repository.ImageRepository
-import com.app.datastore.domain.repository.PredictionHistoryRepository
+import ru.unet_app.datastore.data.repository.ImageRepositoryImpl
+import ru.unet_app.datastore.data.repository.PredictionHistoryRepositoryImpl
+import ru.unet_app.datastore.domain.repository.ImageRepository
+import ru.unet_app.datastore.domain.repository.PredictionHistoryRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

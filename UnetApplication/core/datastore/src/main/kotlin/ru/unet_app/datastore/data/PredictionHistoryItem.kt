@@ -1,4 +1,4 @@
-package com.app.datastore.data
+package ru.unet_app.datastore.data
 
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize

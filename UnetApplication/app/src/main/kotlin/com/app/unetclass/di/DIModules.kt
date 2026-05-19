@@ -1,6 +1,6 @@
 package com.app.unetclass.di
 
-import com.app.domain.utils.Router
+import ru.unet_app.domain.utils.Router
 import com.app.unetclass.utils.AppNavigationComponent
 import dagger.Module
 import dagger.Provides

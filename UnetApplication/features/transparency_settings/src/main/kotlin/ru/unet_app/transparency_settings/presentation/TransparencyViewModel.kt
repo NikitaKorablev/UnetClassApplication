@@ -4,7 +4,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.app.datastore.domain.repository.ImageRepository
+import ru.unet_app.datastore.domain.repository.ImageRepository
 import com.app.model.InferenceMetadata
 import com.app.model.PredictedClasses
 import ru.unet_app.transparency_settings.domain.repository.TransparencyImageProcRepository

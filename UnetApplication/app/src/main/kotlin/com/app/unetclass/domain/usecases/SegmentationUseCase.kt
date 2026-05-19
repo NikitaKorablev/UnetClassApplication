@@ -2,7 +2,7 @@ package com.app.unetclass.domain.usecases
 
 import android.graphics.Bitmap
 import android.os.Debug
-import com.app.datastore.data.PredictionHistoryItem
+import ru.unet_app.datastore.data.PredictionHistoryItem
 import com.app.model.ImageData
 import com.app.model.ResultState
 import ru.unet_app.unet.di.LiteRTModel

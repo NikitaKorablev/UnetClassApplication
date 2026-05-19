@@ -1,4 +1,4 @@
-package com.app.datastore.data.repository
+package ru.unet_app.datastore.data.repository
 
 import android.content.ContentValues
 import android.content.Context

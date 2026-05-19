@@ -9,7 +9,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.app.datastore.data.PredictionHistoryItem
+import ru.unet_app.datastore.data.PredictionHistoryItem
 import com.app.model.InferenceMetadata
 import com.app.model.ResultState
 import ru.unet_app.unet.models.SegmentationResult

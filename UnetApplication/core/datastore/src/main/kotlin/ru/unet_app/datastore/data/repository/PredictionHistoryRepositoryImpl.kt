@@ -1,10 +1,10 @@
-package com.app.datastore.data.repository
+package ru.unet_app.datastore.data.repository
 
 import android.content.Context
 import android.graphics.BitmapFactory
 import android.os.Environment
-import com.app.datastore.data.PredictionHistoryItem
-import com.app.datastore.domain.repository.PredictionHistoryRepository
+import ru.unet_app.datastore.data.PredictionHistoryItem
+import ru.unet_app.datastore.domain.repository.PredictionHistoryRepository
 import com.app.model.ClassNames
 import com.app.model.InferenceMetadata
 import org.json.JSONObject
