@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "com.app.domain"
+    namespace = "ru.unet_app.domain"
     compileSdk {
         version = release(36)
     }
