@@ -1,4 +1,4 @@
-package com.app.unet.domain.usecases
+package ru.unet_app.unet.domain.usecases
 
 import android.graphics.Bitmap
 import com.app.model.Tile

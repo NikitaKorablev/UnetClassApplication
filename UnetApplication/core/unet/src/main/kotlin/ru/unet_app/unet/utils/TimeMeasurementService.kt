@@ -1,4 +1,4 @@
-package com.app.unet.utils
+package ru.unet_app.unet.utils
 
 class TimeMeasurementService {
     fun measureTime(block: () -> Unit): Long {

@@ -1,6 +1,6 @@
-package com.app.unet.di
+package ru.unet_app.unet.di
 
-import com.app.unet.domain.usecases.SplitImageIntoTilesUseCase
+import ru.unet_app.unet.domain.usecases.SplitImageIntoTilesUseCase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

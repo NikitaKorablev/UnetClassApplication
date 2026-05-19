@@ -4,7 +4,6 @@ import android.graphics.Bitmap
 import com.app.datastore.domain.repository.ImageRepository
 import com.app.model.ClassNames
 import com.app.model.InferenceMetadata
-import com.app.unet.data.ImageStitcherResult
 import javax.inject.Inject
 
 class SaveImageStitcherUseCase @Inject constructor(

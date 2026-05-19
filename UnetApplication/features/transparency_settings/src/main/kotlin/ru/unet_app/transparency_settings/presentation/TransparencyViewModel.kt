@@ -1,4 +1,4 @@
-package com.app.transparency_settings.presentation
+package ru.unet_app.transparency_settings.presentation
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -7,7 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.app.datastore.domain.repository.ImageRepository
 import com.app.model.InferenceMetadata
 import com.app.model.PredictedClasses
-import com.app.transparency_settings.domain.repository.TransparencyImageProcRepository
+import ru.unet_app.transparency_settings.domain.repository.TransparencyImageProcRepository
 import com.app.model.TransparencyState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.FlowPreview

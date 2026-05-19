@@ -1,9 +1,9 @@
-package com.app.unet.models.classes
+package ru.unet_app.unet.models.classes
 
 import com.app.model.PredictedClasses
 
-class Mitochondria(
+class PSD(
     override val label: Array<FloatArray> = emptyArray()
 ): BaseLabel() {
-    override val type = PredictedClasses.MITOCHONDRIA
+    override val type: PredictedClasses = PredictedClasses.PSD
 }

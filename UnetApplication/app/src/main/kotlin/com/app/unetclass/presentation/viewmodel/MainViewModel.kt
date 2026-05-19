@@ -12,7 +12,7 @@ import androidx.lifecycle.viewModelScope
 import com.app.datastore.data.PredictionHistoryItem
 import com.app.model.InferenceMetadata
 import com.app.model.ResultState
-import com.app.unet.models.SegmentationResult
+import ru.unet_app.unet.models.SegmentationResult
 import com.app.unetclass.domain.usecases.SaveImageStitcherUseCase
 import com.app.unetclass.domain.usecases.SegmentationUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel

@@ -9,7 +9,7 @@ import android.graphics.PorterDuffXfermode
 import android.util.Log
 import androidx.core.graphics.createBitmap
 import com.app.model.PredictedClasses
-import com.app.transparency_settings.domain.repository.TransparencyImageProcRepository
+import ru.unet_app.transparency_settings.domain.repository.TransparencyImageProcRepository
 import com.app.model.TransparencyState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.joinAll

@@ -1,13 +1,13 @@
-package com.app.unet.data
+package ru.unet_app.unet.data
 
 import com.app.model.PredictedClasses
-import com.app.unet.models.classes.Axon
-import com.app.unet.models.classes.BaseLabel
-import com.app.unet.models.classes.Boundaries
-import com.app.unet.models.classes.Mitochondria
-import com.app.unet.models.classes.MitochondriaBoundaries
-import com.app.unet.models.classes.PSD
-import com.app.unet.models.classes.Vesicles
+import ru.unet_app.unet.models.classes.Axon
+import ru.unet_app.unet.models.classes.BaseLabel
+import ru.unet_app.unet.models.classes.Boundaries
+import ru.unet_app.unet.models.classes.Mitochondria
+import ru.unet_app.unet.models.classes.MitochondriaBoundaries
+import ru.unet_app.unet.models.classes.PSD
+import ru.unet_app.unet.models.classes.Vesicles
 
 class LabelFactory {
     companion object {

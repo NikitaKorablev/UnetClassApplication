@@ -1,4 +1,4 @@
-package com.app.unet.models
+package ru.unet_app.unet.models
 
 import android.graphics.Bitmap
 import android.graphics.Canvas
@@ -6,15 +6,16 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffXfermode
+import android.util.Log
 import androidx.core.graphics.createBitmap
 import com.app.model.TransparencyState
-import com.app.unet.models.classes.Axon
-import com.app.unet.models.classes.BaseLabel
-import com.app.unet.models.classes.Boundaries
-import com.app.unet.models.classes.Mitochondria
-import com.app.unet.models.classes.MitochondriaBoundaries
-import com.app.unet.models.classes.PSD
-import com.app.unet.models.classes.Vesicles
+import ru.unet_app.unet.models.classes.Axon
+import ru.unet_app.unet.models.classes.BaseLabel
+import ru.unet_app.unet.models.classes.Boundaries
+import ru.unet_app.unet.models.classes.Mitochondria
+import ru.unet_app.unet.models.classes.MitochondriaBoundaries
+import ru.unet_app.unet.models.classes.PSD
+import ru.unet_app.unet.models.classes.Vesicles
 
 data class LabeledData(
     val mitochondria: Mitochondria,
@@ -73,7 +74,7 @@ data class LabeledData(
         }
 
         val duration = System.currentTimeMillis() - startTime
-        android.util.Log.d("Analytics", "unitedMask execution time: $duration ms")
+        Log.d("Analytics", "unitedMask execution time: $duration ms")
         return resultBitmap
     }
 

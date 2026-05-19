@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.app.unet"
+    namespace = "ru.unet_app.unet"
     compileSdk {
         version = release(36)
     }

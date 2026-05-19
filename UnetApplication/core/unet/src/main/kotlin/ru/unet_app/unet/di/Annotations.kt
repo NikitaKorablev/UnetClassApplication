@@ -1,4 +1,4 @@
-package com.app.unet.di
+package ru.unet_app.unet.di
 
 import javax.inject.Qualifier
 

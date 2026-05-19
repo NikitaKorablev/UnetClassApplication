@@ -1,4 +1,4 @@
-package com.app.unet.data
+package ru.unet_app.unet.data
 
 import android.content.Context
 import android.util.Log

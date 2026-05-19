@@ -1,11 +1,10 @@
-package com.app.unet.domain
+package ru.unet_app.unet.domain
 
 import com.app.model.ImageData
 import com.app.model.PredictedClasses
 import com.app.model.ResultState
 import com.app.model.Tile
-import com.app.unet.models.LabeledData
-import com.app.unet.models.SegmentationResult
+import ru.unet_app.unet.models.LabeledData
 import kotlin.math.min
 
 interface UnetModel {

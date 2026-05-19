@@ -1,4 +1,4 @@
-package com.app.unet.data.unetmodels
+package ru.unet_app.unet.data.unetmodels
 
 import android.content.Context
 import android.graphics.Bitmap
@@ -7,15 +7,15 @@ import com.app.model.ImageData
 import com.app.model.PredictedClasses
 import com.app.model.ResultState
 import com.app.model.Tile
-import com.app.unet.data.LabelFactory
-import com.app.unet.domain.UnetModel
-import com.app.unet.models.LabeledData
-import com.app.unet.models.classes.Axon
-import com.app.unet.models.classes.Boundaries
-import com.app.unet.models.classes.Mitochondria
-import com.app.unet.models.classes.MitochondriaBoundaries
-import com.app.unet.models.classes.PSD
-import com.app.unet.models.classes.Vesicles
+import ru.unet_app.unet.data.LabelFactory
+import ru.unet_app.unet.domain.UnetModel
+import ru.unet_app.unet.models.LabeledData
+import ru.unet_app.unet.models.classes.Axon
+import ru.unet_app.unet.models.classes.Boundaries
+import ru.unet_app.unet.models.classes.Mitochondria
+import ru.unet_app.unet.models.classes.MitochondriaBoundaries
+import ru.unet_app.unet.models.classes.PSD
+import ru.unet_app.unet.models.classes.Vesicles
 import com.google.ai.edge.litert.Accelerator
 import com.google.ai.edge.litert.CompiledModel
 import com.google.ai.edge.litert.TensorBuffer

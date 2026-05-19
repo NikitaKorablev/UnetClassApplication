@@ -1,4 +1,4 @@
-package com.app.unet.models.classes
+package ru.unet_app.unet.models.classes
 
 import com.app.model.PredictedClasses
 

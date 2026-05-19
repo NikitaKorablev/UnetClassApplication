@@ -1,4 +1,4 @@
-package com.app.unet.models
+package ru.unet_app.unet.models
 
 data class SegmentationResult(
     val labeledData: LabeledData,

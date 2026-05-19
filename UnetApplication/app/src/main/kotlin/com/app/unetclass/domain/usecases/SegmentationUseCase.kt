@@ -5,11 +5,11 @@ import android.os.Debug
 import com.app.datastore.data.PredictionHistoryItem
 import com.app.model.ImageData
 import com.app.model.ResultState
-import com.app.unet.di.LiteRTModel
-import com.app.unet.di.PytorchModel
-import com.app.unet.domain.UnetModel
-import com.app.unet.models.SegmentationResult
-import com.app.unet.domain.usecases.SplitImageIntoTilesUseCase
+import ru.unet_app.unet.di.LiteRTModel
+import ru.unet_app.unet.di.PytorchModel
+import ru.unet_app.unet.domain.UnetModel
+import ru.unet_app.unet.models.SegmentationResult
+import ru.unet_app.unet.domain.usecases.SplitImageIntoTilesUseCase
 import javax.inject.Inject
 import javax.inject.Provider
 

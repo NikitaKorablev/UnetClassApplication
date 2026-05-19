@@ -1,15 +1,14 @@
-package com.app.unet.di
+package ru.unet_app.unet.di
 
 import android.content.Context
-import com.app.unet.data.unetmodels.PyTorchModel
-import com.app.unet.data.unetmodels.TFLiteModel
-import com.app.unet.domain.UnetModel
+import ru.unet_app.unet.data.unetmodels.PyTorchModel
+import ru.unet_app.unet.data.unetmodels.TFLiteModel
+import ru.unet_app.unet.domain.UnetModel
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
