@@ -7,7 +7,7 @@ plugins {
 }
 
 android {
-    namespace = "com.app.datastore"
+    namespace = "ru.unet_app.datastore"
     compileSdk {
         version = release(36)
     }
