@@ -90,7 +90,10 @@ class TransparencyViewModel @Inject constructor(
     }
 
     fun getPreviewImage(): Bitmap {
-        return imageProcessor.overlayMasksWithTransparency(
+//        return imageProcessor.overlayMasksWithTransparency(
+//            classMasks, transparencyState.value
+//        )
+        return imageProcessor.unitedMask(
             classMasks, transparencyState.value
         )
     }

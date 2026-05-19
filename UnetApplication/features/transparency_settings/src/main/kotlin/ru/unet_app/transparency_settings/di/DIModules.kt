@@ -1,6 +1,6 @@
 package com.app.transparency_settings.di
 
-import com.app.transparency_settings.data.repository.TransparencyImageProcImpl
+import ru.unet_app.transparency_settings.data.repository.TransparencyImageProcImpl
 import com.app.transparency_settings.domain.repository.TransparencyImageProcRepository
 import dagger.Module
 import dagger.Provides

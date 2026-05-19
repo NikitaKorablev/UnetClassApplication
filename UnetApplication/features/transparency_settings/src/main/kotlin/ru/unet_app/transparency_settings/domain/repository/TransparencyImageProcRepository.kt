@@ -15,4 +15,12 @@ interface TransparencyImageProcRepository {
         classMasks: Map<PredictedClasses, Bitmap>,
         state: TransparencyState
     ): Bitmap
+
+    /**
+     * Альтернативная реализация наложения масок с использованием Canvas.
+     */
+    fun unitedMask(
+        classMasks: Map<PredictedClasses, Bitmap>,
+        state: TransparencyState
+    ): Bitmap
 }

@@ -1,6 +1,12 @@
-package com.app.transparency_settings.data.repository
+package ru.unet_app.transparency_settings.data.repository
 
 import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.Paint
+import android.graphics.PorterDuff
+import android.graphics.PorterDuffXfermode
+import android.util.Log
 import androidx.core.graphics.createBitmap
 import com.app.model.PredictedClasses
 import com.app.transparency_settings.domain.repository.TransparencyImageProcRepository
@@ -15,6 +21,7 @@ class TransparencyImageProcImpl : TransparencyImageProcRepository {
         classMasks: Map<PredictedClasses, Bitmap>,
         state: TransparencyState
     ): Bitmap = runBlocking(Dispatchers.Default) {
+        val startTime = System.currentTimeMillis()
         require(classMasks.isNotEmpty()) {
             "Не найдены маски для расчета"
         }
@@ -73,6 +80,44 @@ class TransparencyImageProcImpl : TransparencyImageProcRepository {
 
         val outputBitmap = createBitmap(width, height)
         outputBitmap.setPixels(finalColors, 0, width, 0, 0, width, height)
+        
+        val duration = System.currentTimeMillis() - startTime
+        Log.d("Analytics", "overlayMasksWithTransparency execution time: $duration ms")
+        
         outputBitmap
+    }
+
+    override fun unitedMask(
+        classMasks: Map<PredictedClasses, Bitmap>,
+        state: TransparencyState
+    ): Bitmap {
+        val startTime = System.currentTimeMillis()
+        require(classMasks.isNotEmpty()) {
+            "Не найдены маски для расчета"
+        }
+
+        val firstMask = classMasks.values.first()
+        val width = firstMask.width
+        val height = firstMask.height
+
+        val resultBitmap = createBitmap(width, height)
+        val canvas = Canvas(resultBitmap)
+        canvas.drawColor(Color.BLACK)
+
+        val paint = Paint().apply {
+            xfermode = PorterDuffXfermode(PorterDuff.Mode.LIGHTEN)
+            isAntiAlias = false
+        }
+
+        classMasks.forEach { (type, bitmap) ->
+            val alphaFloat = state[type]
+            paint.alpha = (alphaFloat * 255).toInt().coerceIn(0, 255)
+            canvas.drawBitmap(bitmap, 0f, 0f, paint)
+        }
+
+        val duration = System.currentTimeMillis() - startTime
+        Log.d("Analytics", "unitedMask execution time: $duration ms")
+
+        return resultBitmap
     }
 }
