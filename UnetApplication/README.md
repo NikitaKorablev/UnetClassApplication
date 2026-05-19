@@ -1,14 +1,3 @@
-"mcpServers": {
-    "context7": {
-      "httpUrl": "https://mcp.context7.com/mcp",
-      "headers": {
-        "CONTEXT7_API_KEY": "ctx7sk-b629cf44-37aa-413e-9f9c-28d315dd919d",
-        "Accept": "application/json, text/event-stream"
-      }
-    }
-  },
-  "$version": 3
-
 # UnetClass (U-Net Image Segmentation)
 
 A powerful Android application for **semantic image segmentation** using **U-Net neural networks** with support for multiple inference engines (**PyTorch Mobile** and **TensorFlow Lite**). Designed for scientific visualization of cellular structures in microscopy images.
