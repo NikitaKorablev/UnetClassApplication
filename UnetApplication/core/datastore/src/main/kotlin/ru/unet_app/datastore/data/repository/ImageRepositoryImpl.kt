@@ -5,7 +5,7 @@ import android.graphics.Bitmap
 import android.os.Environment
 import android.util.Log
 import ru.unet_app.datastore.domain.repository.ImageRepository
-import com.app.model.InferenceMetadata
+import ru.unet_app.model.InferenceMetadata
 import dagger.hilt.android.qualifiers.ApplicationContext
 import org.json.JSONObject
 import java.io.File

@@ -7,7 +7,7 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.app.model.ClassNames
+import ru.unet_app.model.ClassNames
 import org.json.JSONObject
 import ru.unet_app.inference_details.R
 import ru.unet_app.inference_details.presentation.fullscreen.FullscreenActivity

@@ -5,8 +5,8 @@ import android.graphics.BitmapFactory
 import android.os.Environment
 import ru.unet_app.datastore.data.PredictionHistoryItem
 import ru.unet_app.datastore.domain.repository.PredictionHistoryRepository
-import com.app.model.ClassNames
-import com.app.model.InferenceMetadata
+import ru.unet_app.model.ClassNames
+import ru.unet_app.model.InferenceMetadata
 import org.json.JSONObject
 import java.io.File
 

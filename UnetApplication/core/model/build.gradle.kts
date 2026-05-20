@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "com.app.model"
+    namespace = "ru.unet_app.model"
     compileSdk {
         version = release(36)
     }

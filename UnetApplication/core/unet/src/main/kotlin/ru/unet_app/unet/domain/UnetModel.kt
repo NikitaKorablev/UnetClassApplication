@@ -1,9 +1,9 @@
 package ru.unet_app.unet.domain
 
-import com.app.model.ImageData
-import com.app.model.PredictedClasses
-import com.app.model.ResultState
-import com.app.model.Tile
+import ru.unet_app.model.ImageData
+import ru.unet_app.model.PredictedClasses
+import ru.unet_app.model.ResultState
+import ru.unet_app.model.Tile
 import ru.unet_app.unet.models.LabeledData
 import kotlin.math.min
 

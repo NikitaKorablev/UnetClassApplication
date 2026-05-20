@@ -5,10 +5,10 @@ import android.graphics.BitmapFactory
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import ru.unet_app.datastore.domain.repository.ImageRepository
-import com.app.model.InferenceMetadata
-import com.app.model.PredictedClasses
+import ru.unet_app.model.InferenceMetadata
+import ru.unet_app.model.PredictedClasses
 import ru.unet_app.transparency_settings.domain.repository.TransparencyImageProcRepository
-import com.app.model.TransparencyState
+import ru.unet_app.model.TransparencyState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow

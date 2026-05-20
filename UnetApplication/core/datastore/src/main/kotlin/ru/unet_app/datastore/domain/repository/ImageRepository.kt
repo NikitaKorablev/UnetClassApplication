@@ -1,7 +1,7 @@
 package ru.unet_app.datastore.domain.repository
 
 import android.graphics.Bitmap
-import com.app.model.InferenceMetadata
+import ru.unet_app.model.InferenceMetadata
 import java.io.File
 
 interface ImageRepository {

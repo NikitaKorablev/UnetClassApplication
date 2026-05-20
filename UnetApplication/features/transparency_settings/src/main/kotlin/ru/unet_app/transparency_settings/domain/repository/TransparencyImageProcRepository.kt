@@ -1,8 +1,8 @@
 package ru.unet_app.transparency_settings.domain.repository
 
 import android.graphics.Bitmap
-import com.app.model.PredictedClasses
-import com.app.model.TransparencyState
+import ru.unet_app.model.PredictedClasses
+import ru.unet_app.model.TransparencyState
 
 interface TransparencyImageProcRepository {
     /**

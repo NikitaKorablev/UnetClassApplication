@@ -1,6 +1,6 @@
 package ru.unet_app.unet.models.classes
 
-import com.app.model.PredictedClasses
+import ru.unet_app.model.PredictedClasses
 
 class PSD(
     override val label: Array<FloatArray> = emptyArray()

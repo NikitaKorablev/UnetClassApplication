@@ -2,10 +2,10 @@ package ru.unet_app.unet.data.unetmodels
 
 import android.content.Context
 import android.util.Log
-import com.app.model.ImageData
-import com.app.model.PredictedClasses
-import com.app.model.ResultState
-import com.app.model.Tile
+import ru.unet_app.model.ImageData
+import ru.unet_app.model.PredictedClasses
+import ru.unet_app.model.ResultState
+import ru.unet_app.model.Tile
 import ru.unet_app.unet.data.LabelFactory
 import ru.unet_app.unet.data.Utils
 import ru.unet_app.unet.domain.UnetModel

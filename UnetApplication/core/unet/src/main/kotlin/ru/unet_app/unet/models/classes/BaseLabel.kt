@@ -1,8 +1,8 @@
 package ru.unet_app.unet.models.classes
 
 import androidx.core.graphics.createBitmap
-import com.app.model.PredictedClasses
-import com.app.model.Tile
+import ru.unet_app.model.PredictedClasses
+import ru.unet_app.model.Tile
 
 abstract class BaseLabel {
     abstract val label: Array<FloatArray>

@@ -1,6 +1,6 @@
 package ru.unet_app.unet.data
 
-import com.app.model.PredictedClasses
+import ru.unet_app.model.PredictedClasses
 import ru.unet_app.unet.models.classes.Axon
 import ru.unet_app.unet.models.classes.BaseLabel
 import ru.unet_app.unet.models.classes.Boundaries

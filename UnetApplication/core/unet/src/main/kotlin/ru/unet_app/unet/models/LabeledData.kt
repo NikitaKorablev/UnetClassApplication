@@ -8,7 +8,7 @@ import android.graphics.PorterDuff
 import android.graphics.PorterDuffXfermode
 import android.util.Log
 import androidx.core.graphics.createBitmap
-import com.app.model.TransparencyState
+import ru.unet_app.model.TransparencyState
 import ru.unet_app.unet.models.classes.Axon
 import ru.unet_app.unet.models.classes.BaseLabel
 import ru.unet_app.unet.models.classes.Boundaries

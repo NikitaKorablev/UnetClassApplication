@@ -5,11 +5,11 @@
 ## 🛠 Modules & Path Mapping
 | Module Path | Kotlin Source Root | Package Base | Description |
 |:---|:---|:---|:---|
-| `:app` | `app/src/main/kotlin/` | `com.app.unetclass` | UI Entry point, MainActivity, App-level DI. |
-| `:core:unet` | `core/unet/src/main/kotlin/` | `com.app.unet` | U-Net LiteRT logic, TFLite assets, processing logic. |
-| `:core:model` | `core/model/src/main/kotlin/` | `com.app.model` | Shared domain models & data classes. |
-| `:core:datastore` | `core/datastore/src/main/kotlin/` | `com.app.datastore` | Local persistence (Jetpack DataStore). |
-| `:core:domain` | `core/domain/src/main/kotlin/` | `com.app.domain` | Common business logic/utils. |
+| `:app` | `app/src/main/kotlin/` | `ru.unet_app.unetclass` | UI Entry point, MainActivity, App-level DI. |
+| `:core:unet` | `core/unet/src/main/kotlin/` | `ru.unet_app.unet` | U-Net LiteRT logic, TFLite assets, processing logic. |
+| `:core:model` | `core/model/src/main/kotlin/` | `ru.unet_app.model` | Shared domain models & data classes. |
+| `:core:datastore` | `core/datastore/src/main/kotlin/` | `ru.unet_app.datastore` | Local persistence (Jetpack DataStore). |
+| `:core:domain` | `core/domain/src/main/kotlin/` | `ru.unet_app.domain` | Common business logic/utils. |
 | :features:inference_details | `features/inference_details/src/main/kotlin/` | `ru.unet_app.inference_details` | Inference details and fullscreen image viewing feature. |
 | `:features:transparency_settings` | `features/transparency_settings/src/main/kotlin/` | `ru.unet_app.transparency_settings` | Transparency settings feature. |
 
@@ -21,8 +21,8 @@ Most modules follow a Clean Architecture pattern:
 - `di/`: Koin/Dagger/Hilt module definitions.
 
 ## 🗝 Key Entry Points & Global Config
-- **Application Class:** `app/src/main/kotlin/com/app/unetclass/UnetClassApplication.kt`
-- **MainActivity:** `app/src/main/kotlin/com/app/unetclass/presentation/MainActivity.kt`
+- **Application Class:** `app/src/main/kotlin/ru/unet_app/unetclass/UnetClassApplication.kt`
+- **MainActivity:** `app/src/main/kotlin/ru/unet_app/unetclass/presentation/MainActivity.kt`
 - **Dependencies:** `gradle/libs.versions.toml`
 - **Module Config:** `settings.gradle.kts`
 - **Root Build:** `build.gradle.kts`
@@ -33,12 +33,14 @@ Most modules follow a Clean Architecture pattern:
     - `traced_model.pt` (PyTorch Trace)
 
 ## 💉 Dependency Injection (DI) Registry
-- `:app`: `com.app.unetclass.di`
-- `:core:unet`: `com.app.unet.di`
-- `:core:datastore`: `com.app.datastore.di`
+- `:app`: `ru.unet_app.unetclass.di`
+- `:core:unet`: `ru.unet_app.unet.di`
+- `:core:datastore`: `ru.unet_app.datastore.di`
 - `:features:inference_details`: `ru.unet_app.inference_details.di`
 - `:features:transparency_settings`: `ru.unet_app.transparency_settings.di`
 
 ## 🎨 UI Resources
 - **App Layouts:** `app/src/main/res/layout/`
 - **Values/Strings:** `app/src/main/res/values/`
+
+

@@ -1,7 +1,7 @@
 package ru.unet_app.unet.domain.usecases
 
 import android.graphics.Bitmap
-import com.app.model.Tile
+import ru.unet_app.model.Tile
 
 class SplitImageIntoTilesUseCase {
     /**

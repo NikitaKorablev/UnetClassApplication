@@ -7,13 +7,13 @@ plugins {
 }
 
 android {
-    namespace = "com.app.unetclass"
+    namespace = "ru.unet_app.unetclass"
     compileSdk {
         version = release(36)
     }
 
     defaultConfig {
-        applicationId = "com.app.unetclass"
+        applicationId = "ru.unet_app.unetclass"
         minSdk = 24
         targetSdk = 34
         versionCode = 1
