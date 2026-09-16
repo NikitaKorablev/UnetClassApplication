@@ -2,9 +2,10 @@ name: Android CI / Unit Tests
 
 on:
   push:
-    branches: [ "main", "master", "develop" ]
+    branches: [ "main", "master", "develop", "application" ]
   pull_request:
-    branches: [ "main", "master", "develop" ]
+    branches: [ "main", "master", "develop", "application" ]
+  workflow_dispatch:
 
 jobs:
   unit-tests:
