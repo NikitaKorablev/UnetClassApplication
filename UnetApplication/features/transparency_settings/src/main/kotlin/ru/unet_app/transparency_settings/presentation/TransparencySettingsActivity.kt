@@ -70,9 +70,7 @@ class TransparencySettingsActivity : AppCompatActivity() {
 
         require(resultPath != null) { "Не найден путь для сохранения изображений" }
 
-        lifecycleScope.launch {
-            viewModel.setupData(bitmapPaths, bitmapArray, resultPath)
-        }
+        viewModel.setupData(bitmapPaths, bitmapArray, resultPath)
     }
 
     private fun subscribeOnPreviewImage() {
